@@ -11,6 +11,33 @@ const PLANE_CONFIG: Record<DepthPlane, { zPx: number; blurPx: number; opacity: n
   Z4: { zPx: 420, blurPx: 14, opacity: 0.2 },
 };
 
+const PLANE_INDEX: Record<DepthPlane, number> = { Z0: 0, Z1: 1, Z2: 2, Z3: 3, Z4: 4 };
+
+type FocusState = { sharp: DepthPlane; boost: number; focusIndex: number | null };
+
+const FocusContext = React.createContext<FocusState>({ sharp: 'Z2', boost: 0, focusIndex: null });
+
+/** Blur by signed distance from the sharp plane. Nearer planes blur harder than farther ones. */
+function premiumBlur(plane: DepthPlane, sharp: DepthPlane, boost: number): number {
+  const dist = PLANE_INDEX[plane] - PLANE_INDEX[sharp];
+  if (dist === 0) return 0;
+  const mag = Math.abs(dist);
+  const towardCamera = dist > 0;
+  return Math.min(20, (towardCamera ? 8 + mag * 3.5 : 3 + mag * 3) + boost);
+}
+
+/** Continuous rack-focus blur. At focusIndex 2 and boost 0 this matches the default Z-table. */
+function rackBlur(plane: DepthPlane, focusIndex: number, boost: number): number {
+  const dist = PLANE_INDEX[plane] - focusIndex;
+  const mag = Math.abs(dist);
+  if (mag < 0.05) return 0;
+  const towardCamera = dist > 0;
+  const base = towardCamera
+    ? (mag <= 1 ? mag * 10 : 10 + (mag - 1) * 4)
+    : (mag <= 1 ? mag * 3 : 3 + (mag - 1) * 5);
+  return Math.min(20, base + boost);
+}
+
 export interface MultiplaneCamKey {
   f: number;
   x: number;
@@ -55,14 +82,21 @@ export const MultiplaneCameraRig: React.FC<{
   local: number;
   frame: number;
   keys: MultiplaneCamKey[];
+  /** Plane that stays sharp. Omit to keep the original Z2-sharp blur table. */
+  sharpPlane?: DepthPlane;
+  /** 0 = Z0 … 4 = Z4. When set, focus racks continuously instead of stepping. */
+  focusIndex?: number;
+  /** Extra blur on every plane except the sharp one. Use during macro inserts. */
+  defocusBoost?: number;
   children: React.ReactNode;
-}> = ({ local, frame, keys, children }) => {
+}> = ({ local, frame, keys, sharpPlane = 'Z2', focusIndex, defocusBoost = 0, children }) => {
   const cam = interpKeys(local, keys);
   const driftX = Math.sin(frame * 0.025) * 3.5;
   const driftY = Math.cos(frame * 0.021) * 3.0;
   const driftRotZ = Math.sin(frame * 0.017) * 0.14;
 
   return (
+    <FocusContext.Provider value={{ sharp: sharpPlane, boost: defocusBoost, focusIndex: focusIndex ?? null }}>
     <div
       style={{
         position: 'absolute',
@@ -84,6 +118,7 @@ export const MultiplaneCameraRig: React.FC<{
         {children}
       </div>
     </div>
+    </FocusContext.Provider>
   );
 };
 
@@ -97,7 +132,23 @@ export const DepthLayer: React.FC<{
   children: React.ReactNode;
 }> = ({ plane, blurOverride, opacityOverride, children }) => {
   const cfg = PLANE_CONFIG[plane];
-  const blur = blurOverride ?? cfg.blurPx;
+  const focus = React.useContext(FocusContext);
+  const premium = focus.focusIndex != null || focus.sharp !== 'Z2' || focus.boost > 0.01;
+  const dist = focus.focusIndex != null
+    ? PLANE_INDEX[plane] - focus.focusIndex
+    : PLANE_INDEX[plane] - PLANE_INDEX[focus.sharp];
+  let blur = blurOverride ?? cfg.blurPx;
+  let grade = '';
+  if (premium) {
+    if (focus.focusIndex != null && blurOverride == null) {
+      blur = rackBlur(plane, focus.focusIndex, focus.boost);
+    } else if (blurOverride != null && Math.abs(dist) > 0.2) {
+      blur = blurOverride + focus.boost;
+    } else {
+      blur = premiumBlur(plane, focus.sharp, focus.boost);
+    }
+    if (dist < -0.35) grade = ' saturate(0.72) brightness(1.07)';
+  }
   const opacity = opacityOverride ?? cfg.opacity;
 
   return (
@@ -108,7 +159,7 @@ export const DepthLayer: React.FC<{
         inset: 0,
         transform: `translateZ(${cfg.zPx}px) scale(${(1 - cfg.zPx / 1100).toFixed(4)})`,
         transformOrigin: '960px 540px',
-        filter: blur > 0 ? `blur(${blur}px)` : undefined,
+        filter: blur > 0 || grade ? `blur(${blur.toFixed(2)}px)${grade}` : undefined,
         opacity,
         pointerEvents: 'none',
       }}

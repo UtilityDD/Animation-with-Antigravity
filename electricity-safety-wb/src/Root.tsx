@@ -29,6 +29,10 @@ import {
   VidyuterPathshalaEP01V2,
   EP01_V2_TOTAL_FRAMES,
 } from './vidyuter-pathshala/ep01_v2/VidyuterPathshalaEP01V2';
+import {
+  Ep01WinterHookPremiumTest,
+  WINTER_HOOK_TEST_FRAMES,
+} from './vidyuter-pathshala/ep01_v2/Ep01WinterHookScene';
 import { SceneManager } from './SceneManager';
 import { RoguePlanetsSceneManager } from './rogue-planets/RoguePlanetsSceneManager';
 import { KurzgesagtSafetySceneManager } from './kurzgesagt-safety/KurzgesagtSafetySceneManager';
@@ -81,6 +85,16 @@ export const RemotionRoot: React.FC = () => {
         id="VidyuterPathshalaEP01V2"
         component={VidyuterPathshalaEP01V2}
         durationInFrames={EP01_V2_TOTAL_FRAMES}
+        fps={60}
+        width={1920}
+        height={1080}
+      />
+
+      {/* Premium craft test: winter hook only, before the style-guide update */}
+      <Composition
+        id="PremiumCraftTest"
+        component={Ep01WinterHookPremiumTest}
+        durationInFrames={WINTER_HOOK_TEST_FRAMES}
         fps={60}
         width={1920}
         height={1080}

@@ -277,17 +277,17 @@ export const ThalesRig: React.FC<ThalesRigProps> = ({
           )}
 
           {leftArmState === 'holdingWool' && (
-            <g transform="translate(-112, 42)">
+            <g transform={`translate(-112, 42) rotate(${-18 + rubProgress * 10})`}>
               <path
                 d="M -18,-10 C -45,28 -48,95 -32,148 L 16,142 C 12,92 18,32 28,-8 Z"
                 fill="url(#himationBase)"
                 stroke="#94A3B8"
                 strokeWidth="2"
               />
-              <g transform="translate(-18, 144) rotate(-16)">
+              <g transform={`translate(-14, 140) rotate(${-64 + rubProgress * 22})`}>
                 <rect x="-14" y="0" width="28" height="86" rx="13" fill="url(#thalesSkinShadow)" />
                 <circle cx="0" cy="92" r="20" fill="url(#thalesSkinShadow)" />
-                <g transform="translate(10, 100)">
+                <g transform="translate(14, 96)">
                   <path
                     d="M -45,-15 C -20,-35 45,-30 65,-10 C 80,15 70,50 45,65 C 20,75 -35,70 -50,45 C -65,25 -60,5 -45,-15 Z"
                     fill="url(#woolCloth)"
@@ -341,16 +341,16 @@ export const ThalesRig: React.FC<ThalesRigProps> = ({
           {/* NEAR / RIGHT ARM (Foreground expressive posture)           */}
           {/* ========================================================== */}
           {rightArmState === 'rubbingAmber' && (
-            <g transform={`translate(105, 42) rotate(${22 + rubAngle})`}>
+            <g transform={`translate(105, 42) rotate(${22 + rubAngle + amazeBlend * 18})`}>
               <path
                 d="M -18,-10 C 4,38 2,96 -16,142 L 24,146 C 36,98 32,38 18,-10 Z"
                 fill="url(#himationBase)"
                 stroke="#94A3B8"
                 strokeWidth="2"
               />
-              <g transform={`translate(-8, 140) rotate(${-50 + rubAngle * 0.8})`}>
+              <g transform={`translate(-8, 140) rotate(${-50 + rubAngle * 0.8 + amazeBlend * 22})`}>
                 <rect x="-15" y="0" width="30" height="92" rx="14" fill="url(#thalesSkin)" />
-                <g transform={`translate(${rubX}, 92)`}>
+                <g transform={`translate(${rubX * (1 - amazeBlend * 0.7)}, 92)`}>
                   <ellipse cx="-4" cy="8" rx="14" ry="15" fill="url(#thalesSkin)" />
                   <g transform="translate(14, 8)">
                     <path

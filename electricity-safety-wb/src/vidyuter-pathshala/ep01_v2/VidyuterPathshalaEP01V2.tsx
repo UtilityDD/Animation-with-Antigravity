@@ -7,6 +7,7 @@ import { Ep01WinterHookScene } from './Ep01WinterHookScene';
 import { Ep01BrokenTimelineScene, Ep01MiletusScene } from './Ep01MiletusAndTimelineScene';
 import { Ep01MicroPhysicsScene, Ep01SwitchBulbScene } from './Ep01MicroPhysicsScene';
 import { Ep01ConfusionOutroScene } from './Ep01ConfusionOutroScene';
+import { ACT1 } from './voiceBeats';
 
 export const EP01_V2_DURATIONS = {
   intro: 180,          // 3.00s
@@ -52,10 +53,10 @@ export const VidyuterPathshalaEP01V2: React.FC = () => {
 
       <Sequence from={f1} durationInFrames={EP01_V2_DURATIONS.act1}>
         <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/act1_hook.mp3')} volume={1.0} />
-        <Sequence from={320} durationInFrames={30}>
+        <Sequence from={ACT1.spark} durationInFrames={30}>
           <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/sfx_blanket_snap.mp3')} volume={0.35} />
         </Sequence>
-        <Sequence from={540} durationInFrames={24}>
+        <Sequence from={ACT1.click} durationInFrames={24}>
           <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/sfx_switch_click.mp3')} volume={0.38} />
         </Sequence>
         <Ep01WinterHookScene frame={frame} local={frame - f1} duration={EP01_V2_DURATIONS.act1} />
