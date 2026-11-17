@@ -106,9 +106,12 @@ export const Ep01MiletusScene: React.FC<{ frame: number; local: number; duration
             />
             <svg width="1920" height="1080" style={{ position: 'relative', zIndex: 2, overflow: 'visible' }}>
               <rect x="-100" y="710" width="2120" height="400" fill="#23160C" stroke="#5C3A21" strokeWidth="4" />
-              {/* Amber Gem held above table + Static Attraction Threads + Staggered Feathers */}
+              {/* Amber Gem held above table + Rubbing Micro-Sparks + Static Attraction Threads + Staggered Feathers */}
               <g transform="translate(690, 505)">
                 <AmberGem id="miletusAmber" size={68} glow={featherLift} charge={featherLift} />
+                {local >= 320 && local < 560 && Math.sin(frame * 0.9) > 0.2 && (
+                  <path d="M -24,-10 L -10,-26 L 2,-8 L 18,-22" fill="none" stroke="#E0F2FE" strokeWidth="3" filter="drop-shadow(0 0 8px #38BDF8)" />
+                )}
               </g>
               {[-54, 0, 54].map((fx, i) => {
                 const stagger = Math.max(0, Math.min(1, featherLift * 1.25 - i * 0.12));
@@ -270,7 +273,7 @@ export const Ep01BrokenTimelineScene: React.FC<{ frame: number; local: number; d
             const enterT = ci(bLocal, [-12, 18], [0, 1], EASE_OUT);
             const exitT = ci(bLocal, [bDur - 18, bDur + 12], [1, 0], EASE_INOUT);
             const alpha = enterT * exitT;
-            const slideX = (1 - enterT) * 90 - (1 - exitT) * 90;
+            const zScale = 0.82 + enterT * 0.3 + (1 - exitT) * 0.28;
 
             return (
               <div
@@ -279,7 +282,6 @@ export const Ep01BrokenTimelineScene: React.FC<{ frame: number; local: number; d
                   position: 'absolute',
                   inset: 0,
                   opacity: alpha,
-                  transform: `translateX(${slideX}px)`,
                   pointerEvents: 'none',
                 }}
               >
@@ -288,7 +290,7 @@ export const Ep01BrokenTimelineScene: React.FC<{ frame: number; local: number; d
                     position: 'absolute',
                     left: 960,
                     top: 470,
-                    transform: 'translate(-50%, -50%) scale(1.12)',
+                    transform: `translate(-50%, -50%) scale(${zScale.toFixed(3)})`,
                   }}
                 >
                   {idx === 0 && <GilbertVersoriumSVG frame={frame} local={Math.max(0, bLocal)} />}

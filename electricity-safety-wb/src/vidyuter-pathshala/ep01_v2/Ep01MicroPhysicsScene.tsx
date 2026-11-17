@@ -2,7 +2,6 @@ import React from 'react';
 import { DustMotes, EASE_INOUT, EASE_OUT, ci } from '../historical/scene1/Scene1Shared';
 import { DepthLayer, KineticWord, MultiplaneCameraRig } from '../core/MultiplaneCameraRig';
 import { VidyuterKineticTitle } from '../historical/VidyuterBanglaKinetic';
-import { ACT3, ACT3E } from './voiceBeats';
 
 /**
  * ACT 3A–3D: Electron Cloud Atom (NO Bohr rings!) + Dry Hair/Comb/Paper Induced Polarization
@@ -15,13 +14,13 @@ export const Ep01MicroPhysicsScene: React.FC<{ frame: number; local: number; dur
   const localMs = (local / 60) * 1000;
   const fadeIn = ci(local, [0, 20], [0, 1], EASE_OUT);
   const fadeOut = ci(local, [duration - 28, duration], [1, 0], EASE_INOUT);
-  const atomAlpha = ci(local, [0, 24, ACT3.friction - 20, ACT3.friction + 16], [0, 1, 1, 0], EASE_INOUT);
-  const combStageAlpha = ci(local, [ACT3.friction - 10, ACT3.friction + 24], [0, 1], EASE_OUT);
-  const combSlide = ci(local, [ACT3.friction, ACT3.friction + 80], [-420, 0], EASE_OUT);
-  const combApproach = ci(local, [ACT3.friction + 70, ACT3.paper - 20], [0, 1], EASE_INOUT);
-  const chargeTransfer = ci(local, [ACT3.friction + 16, ACT3.friction + 110], [0, 1], EASE_OUT);
-  const polarize = ci(local, [ACT3.friction + 90, ACT3.paper - 8], [0, 1], EASE_OUT);
-  const paperLift = ci(local, [ACT3.paper, ACT3.paper + 36, Math.min(duration - 8, ACT3.paper + 90)], [0, 0.2, 1], EASE_OUT);
+  const atomAlpha = ci(local, [0, 24, duration * 0.48, duration * 0.54], [0, 1, 1, 0], EASE_INOUT);
+  const combStageAlpha = ci(local, [duration * 0.48, duration * 0.55], [0, 1], EASE_OUT);
+  const combSlide = ci(local, [duration * 0.52, duration * 0.66], [-420, 0], EASE_OUT);
+  const combApproach = ci(local, [duration * 0.64, duration * 0.78], [0, 1], EASE_INOUT);
+  const chargeTransfer = ci(local, [duration * 0.55, duration * 0.68], [0, 1], EASE_OUT);
+  const polarize = ci(local, [duration * 0.65, duration * 0.78], [0, 1], EASE_OUT);
+  const paperLift = ci(local, [duration * 0.76, duration * 0.92], [0, 1], EASE_OUT);
 
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#0B1120', opacity: fadeIn * fadeOut, overflow: 'hidden' }}>
@@ -29,13 +28,13 @@ export const Ep01MicroPhysicsScene: React.FC<{ frame: number; local: number; dur
         local={local}
         frame={frame}
         keys={[
-          { f: 0, x: 0, y: 0, z: 0.92, rotateY: -1.4 },
-          { f: ACT3.intoAtom, x: 0, y: -8, z: 1.18, rotateY: -0.4 },
-          { f: ACT3.nucleus, x: 0, y: 0, z: 1.46, rotateY: 0.3 },
-          { f: ACT3.cloud, x: 0, y: 6, z: 1.38, rotateY: -0.5 },
-          { f: ACT3.friction, x: -180, y: 16, z: 1.22, rotateY: 1.0 },
-          { f: ACT3.paper, x: 90, y: 48, z: 1.4, rotateY: -0.6 },
-          { f: duration, x: 40, y: 12, z: 1.16, rotateY: 0 },
+          { f: 0, x: 0, y: 0, z: 0.86, rotateY: -2.0 },
+          { f: 340, x: 0, y: -15, z: 1.48, rotateY: -0.6 },
+          { f: 780, x: 0, y: 10, z: 1.36, rotateY: 2.2 },
+          { f: 900, x: -240, y: 10, z: 1.24, rotateY: 1.0 },
+          { f: 1120, x: 110, y: -20, z: 1.22, rotateY: -0.6 },
+          { f: 1400, x: 155, y: 65, z: 1.34, rotateY: -1.4 },
+          { f: duration, x: 120, y: 35, z: 1.26, rotateY: 0 },
         ]}
       >
         <DepthLayer plane="Z0">
@@ -172,11 +171,13 @@ export const Ep01MicroPhysicsScene: React.FC<{ frame: number; local: number; dur
                 { ox: 155, oy: 18, rot: -10, stagger: 0.28 },
               ].map((scrap, idx) => {
                 const liftT = Math.max(0, Math.min(1, paperLift * 1.35 - scrap.stagger));
-                const py = 720 + scrap.oy - liftT * 155;
+                const contactBounce = liftT > 0.92 ? Math.sin((liftT - 0.92) * 38) * 6 : 0;
+                const py = 720 + scrap.oy - liftT * 155 + contactBounce;
+                const squashY = liftT > 0.92 ? 0.94 + Math.abs(Math.sin((liftT - 0.92) * 30)) * 0.06 : 1;
                 const pRot = scrap.rot * (1 - liftT * 0.65) + Math.sin(frame * 0.1 + idx) * 3 * liftT;
                 const plusShift = polarize * 18;
                 return (
-                  <g key={idx} transform={`translate(${1150 + scrap.ox}, ${py}) rotate(${pRot})`}>
+                  <g key={idx} transform={`translate(${1150 + scrap.ox}, ${py}) rotate(${pRot}) scale(1, ${squashY.toFixed(3)})`}>
                     <path
                       d="M -62,-36 L -18,-42 L 24,-34 L 64,-38 L 58,0 L 66,36 L 12,42 L -32,34 L -64,38 L -56,2 Z"
                       fill="#F5EBD6"
@@ -205,15 +206,15 @@ export const Ep01MicroPhysicsScene: React.FC<{ frame: number; local: number; dur
         </DepthLayer>
       </MultiplaneCameraRig>
 
-      <VidyuterKineticTitle frame={local} startFrame={ACT3.intoAtom} endFrame={ACT3.friction - 12} lines={[{ text: 'পরমাণু ও ইলেকট্রন মেঘ', highlight: 'ইলেকট্রন', sizePx: 62 }]} align="center" x={960} y={78} accentColor="#38BDF8" variant="spring" />
-      <VidyuterKineticTitle frame={local} startFrame={ACT3.friction} endFrame={duration - 24} lines={[{ text: 'আবেশে কাগজ আকর্ষণ!', highlight: 'আবেশে', sizePx: 64 }]} align="center" x={960} y={78} accentColor="#FBBF24" variant="spark" />
+      <VidyuterKineticTitle frame={local} startFrame={20} endFrame={840} lines={[{ text: 'পরমাণু ও ইলেকট্রন মেঘ', highlight: 'ইলেকট্রন', sizePx: 62 }]} align="center" x={960} y={78} accentColor="#38BDF8" variant="spring" />
+      <VidyuterKineticTitle frame={local} startFrame={860} endFrame={1640} lines={[{ text: 'আবেশে কাগজ আকর্ষণ!', highlight: 'আবেশে', sizePx: 64 }]} align="center" x={960} y={78} accentColor="#FBBF24" variant="spark" />
       <KineticWord localMs={localMs} appearMs={800} emphasizeStartMs={1000} emphasizeEndMs={2400} removeMs={2800} text="উপস্থিতি" x={520} y={870} accentColor="#F43F5E" mode="SCALE_GLOW" />
       <KineticWord localMs={localMs} appearMs={2500} emphasizeStartMs={2700} emphasizeEndMs={4200} removeMs={4600} text="ক্রিয়া" x={960} y={870} accentColor="#FBBF24" mode="SCALE_GLOW" />
       <KineticWord localMs={localMs} appearMs={4300} emphasizeStartMs={4500} emphasizeEndMs={6000} removeMs={6400} text="গতি" x={1400} y={870} accentColor="#38BDF8" mode="SCALE_GLOW" />
-      <KineticWord localMs={localMs} appearMs={(ACT3.nucleus / 60) * 1000} emphasizeStartMs={((ACT3.nucleus + 20) / 60) * 1000} emphasizeEndMs={(ACT3.cloud / 60) * 1000} removeMs={((ACT3.cloud + 40) / 60) * 1000} text="প্রোটন + নিউট্রন" x={960} y={870} accentColor="#F43F5E" mode="SCALE_GLOW" />
-      <KineticWord localMs={localMs} appearMs={(ACT3.cloud / 60) * 1000} emphasizeStartMs={((ACT3.cloud + 24) / 60) * 1000} emphasizeEndMs={(ACT3.friction / 60) * 1000} removeMs={((ACT3.friction + 30) / 60) * 1000} text="ইলেকট্রন মেঘ" x={960} y={870} accentColor="#38BDF8" mode="SCALE_GLOW" />
-      <KineticWord localMs={localMs} appearMs={(ACT3.friction / 60) * 1000} emphasizeStartMs={((ACT3.friction + 30) / 60) * 1000} emphasizeEndMs={(ACT3.paper / 60) * 1000} removeMs={((ACT3.paper + 10) / 60) * 1000} text="আবেশ" x={760} y={870} accentColor="#FBBF24" mode="SCALE_GLOW" />
-      <KineticWord localMs={localMs} appearMs={(ACT3.paper / 60) * 1000} emphasizeStartMs={((ACT3.paper + 16) / 60) * 1000} emphasizeEndMs={((ACT3.paper + 80) / 60) * 1000} removeMs={((ACT3.paper + 110) / 60) * 1000} text="লাফিয়ে ওঠে!" x={1180} y={870} accentColor="#38BDF8" mode="SCALE_GLOW" />
+      <KineticWord localMs={localMs} appearMs={7800} emphasizeStartMs={8100} emphasizeEndMs={10300} removeMs={10800} text="প্রোটন + নিউট্রন" x={960} y={870} accentColor="#F43F5E" mode="SCALE_GLOW" />
+      <KineticWord localMs={localMs} appearMs={10700} emphasizeStartMs={11000} emphasizeEndMs={13500} removeMs={14000} text="ইলেকট্রন মেঘ" x={960} y={870} accentColor="#38BDF8" mode="SCALE_GLOW" />
+      <KineticWord localMs={localMs} appearMs={21000} emphasizeStartMs={21300} emphasizeEndMs={24200} removeMs={24800} text="আবেশ" x={760} y={870} accentColor="#FBBF24" mode="SCALE_GLOW" />
+      <KineticWord localMs={localMs} appearMs={24200} emphasizeStartMs={24500} emphasizeEndMs={27000} removeMs={27500} text="লাফিয়ে ওঠে!" x={1180} y={870} accentColor="#38BDF8" mode="SCALE_GLOW" />
     </div>
   );
 };
@@ -229,19 +230,21 @@ export const Ep01SwitchBulbScene: React.FC<{ frame: number; local: number; durat
   const localMs = (local / 60) * 1000;
   const fadeIn = ci(local, [0, 20], [0, 1], EASE_OUT);
   const fadeOut = ci(local, [duration - 28, duration], [1, 0], EASE_INOUT);
-  const showHomeGrid = local >= ACT3E.fan;
-  const switchFrame = ACT3E.click;
-  const switchClosed = local >= switchFrame;
-  const rockerT = local < switchFrame - 12
+  const showHomeGrid = local >= duration * 0.72;
+  const switchFrame = duration * 0.22;
+  const switchClosed = local >= switchFrame && local < duration * 0.68;
+  const rockerT = local < switchFrame - 8
     ? 0
-    : ci(local, [switchFrame - 12, switchFrame + 8, switchFrame + 20], [0, 1.12, 1], EASE_OUT);
-  const waveT = switchClosed ? ci(local, [ACT3E.flow, ACT3E.flow + 50], [0, 1], EASE_OUT) : 0;
-  const bulbHeat = switchClosed ? ci(local, [ACT3E.flow + 8, ACT3E.conserve + 40], [0, 1], EASE_OUT) : 0;
+    : local >= duration * 0.68
+      ? ci(local, [duration * 0.68, duration * 0.68 + 14], [1, 0], EASE_OUT)
+      : ci(local, [switchFrame - 8, switchFrame + 8, switchFrame + 20], [0, 1.12, 1], EASE_OUT);
+  const waveT = switchClosed ? ci(local, [switchFrame, switchFrame + 38], [0, 1], EASE_OUT) : 0;
+  const bulbHeat = switchClosed ? ci(local, [switchFrame + 18, switchFrame + 78], [0, 1], EASE_OUT) : 0;
   const filamentColor =
     bulbHeat < 0.16 ? '#475569' :
-    bulbHeat < 0.38 ? '#9F1239' :
-    bulbHeat < 0.58 ? '#EA580C' :
-    bulbHeat < 0.8 ? '#FDBA74' : '#FEF08A';
+      bulbHeat < 0.38 ? '#9F1239' :
+        bulbHeat < 0.58 ? '#EA580C' :
+          bulbHeat < 0.8 ? '#FDBA74' : '#FEF08A';
   const driftOffset = switchClosed ? (local - switchFrame) * 1.15 : 0;
   const fanRot = (frame * 8) % 360;
 
@@ -256,8 +259,8 @@ export const Ep01SwitchBulbScene: React.FC<{ frame: number; local: number; durat
           { f: 0, x: 0, y: 170, z: 1.42, rotateY: 1.2 },
           { f: switchFrame - 10, x: 0, y: 170, z: 1.48, rotateY: 0 },
           { f: switchFrame + 55, x: 250, y: 20, z: 1.28, rotateY: -1.4 },
-          { f: ACT3E.notEaten, x: 290, y: -10, z: 1.34, rotateY: -0.6 },
-          { f: ACT3E.fan, x: 0, y: 0, z: 1.02, rotateY: 0 },
+          { f: duration * 0.68, x: 290, y: -10, z: 1.34, rotateY: -0.6 },
+          { f: duration * 0.74, x: 0, y: 0, z: 1.02, rotateY: 0 },
           { f: duration, x: 0, y: 0, z: 1.08, rotateY: 0.8 },
         ]}
       >
@@ -336,7 +339,20 @@ export const Ep01SwitchBulbScene: React.FC<{ frame: number; local: number; durat
               {/* Detailed Glass Bulb with Coiled Tungsten Filament Heating Up */}
               <g transform="translate(1480, 520)">
                 {bulbHeat > 0.05 && (
-                  <circle cx="0" cy="-10" r={120 + bulbHeat * 75} fill="rgba(254, 240, 138, 0.28)" opacity={bulbHeat} />
+                  <>
+                    <circle cx="0" cy="-10" r={120 + bulbHeat * 110} fill="rgba(254, 240, 138, 0.28)" opacity={bulbHeat} />
+                    {bulbHeat > 0.55 && [-22, 0, 22].map((hx, hIdx) => (
+                      <path
+                        key={hx}
+                        d={`M ${hx},-95 Q ${hx + Math.sin(frame * 0.18 + hIdx) * 8},-120 ${hx},-145`}
+                        fill="none"
+                        stroke="#FDE68A"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        opacity={(bulbHeat - 0.55) * 0.9}
+                      />
+                    ))}
+                  </>
                 )}
                 <rect x="-26" y="58" width="52" height="30" rx="6" fill="#94A3B8" stroke="#475569" strokeWidth="2.5" />
                 <path d="M -38,56 C -68,36 -74,-18 -54,-52 C -32,-88 32,-88 54,-52 C 74,-18 68,36 38,56 Z" fill={bulbHeat < 0.12 ? 'rgba(30, 41, 59, 0.68)' : bulbHeat < 0.45 ? `rgba(159, 18, 57, ${0.2 + bulbHeat * 0.45})` : `rgba(254, 240, 138, ${0.18 + bulbHeat * 0.7})`} stroke={bulbHeat > 0.7 ? '#FDE68A' : '#BAE6FD'} strokeWidth="3.5" />
@@ -369,9 +385,8 @@ export const Ep01SwitchBulbScene: React.FC<{ frame: number; local: number; durat
                 { x: 1270, label: 'কলিং বেল', c: '#A855F7' },
                 { x: 1580, label: 'জলের পাম্প', c: '#10B981' },
               ].map((app, idx) => {
-                const appearAt = [ACT3E.fan, ACT3E.iron, ACT3E.fan, ACT3E.bell, ACT3E.pump];
-                const pop = ci(local, [appearAt[idx], appearAt[idx] + 18], [0, 1], EASE_OUT);
-                const heroSlot = local < ACT3E.iron ? 0 : local < ACT3E.bell ? 1 : local < ACT3E.pump ? 3 : 4;
+                const pop = ci(local, [duration * 0.72 + idx * 18, duration * 0.72 + idx * 18 + 26], [0, 1], EASE_OUT);
+                const heroSlot = Math.max(0, Math.min(4, Math.floor((local - duration * 0.72) / 90)));
                 const dim = idx === heroSlot ? 1 : 0.34;
                 return (
                   <g key={app.label} transform={`translate(${app.x}, 520) scale(${0.72 + pop * (idx === heroSlot ? 0.32 : 0.16)})`} opacity={pop * dim}>
@@ -437,11 +452,11 @@ export const Ep01SwitchBulbScene: React.FC<{ frame: number; local: number; durat
         </DepthLayer>
       </MultiplaneCameraRig>
 
-      <VidyuterKineticTitle frame={local} startFrame={ACT3E.notEaten} endFrame={ACT3E.fan - 8} lines={[{ text: 'বাল্ব ইলেকট্রন খায় না!', highlight: 'খায় না!', sizePx: 62 }]} align="center" x={960} y={80} accentColor="#10B981" variant="spring" />
-      <KineticWord localMs={localMs} appearMs={(ACT3E.jitter / 60) * 1000} emphasizeStartMs={((ACT3E.jitter + 20) / 60) * 1000} emphasizeEndMs={(ACT3E.click / 60) * 1000} removeMs={((ACT3E.click + 20) / 60) * 1000} text="জায়গায় কাঁপছে" x={960} y={900} accentColor="#38BDF8" mode="SCALE_GLOW" />
-      <KineticWord localMs={localMs} appearMs={(ACT3E.flow / 60) * 1000} emphasizeStartMs={((ACT3E.flow + 20) / 60) * 1000} emphasizeEndMs={(ACT3E.conserve / 60) * 1000} removeMs={((ACT3E.conserve + 30) / 60) * 1000} text="একমুখী প্রবাহ" x={960} y={900} accentColor="#FBBF24" mode="SCALE_GLOW" />
-      <KineticWord localMs={localMs} appearMs={(ACT3E.conserve / 60) * 1000} emphasizeStartMs={((ACT3E.conserve + 24) / 60) * 1000} emphasizeEndMs={(ACT3E.notEaten / 60) * 1000} removeMs={((ACT3E.notEaten + 20) / 60) * 1000} text="5 ঢোকে = 5 বেরোয়" x={1420} y={240} accentColor="#10B981" mode="SCALE_GLOW" />
-      <KineticWord localMs={localMs} appearMs={(ACT3E.notEaten / 60) * 1000} emphasizeStartMs={((ACT3E.notEaten + 20) / 60) * 1000} emphasizeEndMs={(ACT3E.fan / 60) * 1000} removeMs={((ACT3E.fan + 10) / 60) * 1000} text="5 IN = 5 OUT" x={1420} y={240} accentColor="#10B981" mode="SCALE_GLOW" />
+      <VidyuterKineticTitle frame={local} startFrame={20} endFrame={1300} lines={[{ text: 'বাল্ব ইলেকট্রন খায় না!', highlight: 'খায় না!', sizePx: 62 }]} align="center" x={960} y={80} accentColor="#10B981" variant="spring" />
+      <KineticWord localMs={localMs} appearMs={2600} emphasizeStartMs={2900} emphasizeEndMs={5600} removeMs={6100} text="জায়গায় কাঁপছে" x={960} y={900} accentColor="#38BDF8" mode="SCALE_GLOW" />
+      <KineticWord localMs={localMs} appearMs={7000} emphasizeStartMs={7300} emphasizeEndMs={10200} removeMs={10800} text="একমুখী প্রবাহ" x={960} y={900} accentColor="#FBBF24" mode="SCALE_GLOW" />
+      <KineticWord localMs={localMs} appearMs={11200} emphasizeStartMs={11500} emphasizeEndMs={15400} removeMs={16000} text="5 ঢোকে = 5 বেরোয়" x={1420} y={240} accentColor="#10B981" mode="SCALE_GLOW" />
+      <KineticWord localMs={localMs} appearMs={16400} emphasizeStartMs={16700} emphasizeEndMs={20600} removeMs={21200} text="5 IN = 5 OUT" x={1420} y={240} accentColor="#10B981" mode="SCALE_GLOW" />
     </div>
   );
 };

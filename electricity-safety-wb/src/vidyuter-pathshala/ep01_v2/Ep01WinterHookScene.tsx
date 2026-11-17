@@ -490,6 +490,30 @@ export const Ep01WinterHookScene: React.FC<{ frame: number; local: number; durat
         </DepthLayer>
       </MultiplaneCameraRig>
 
+      {/* Environmental Lighting Response: Spark Blue Flash + Bulb Warm Room Bounce */}
+      {sparkPulse > 0.35 && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(circle at 38% 58%, rgba(56, 189, 248, 0.16) 0%, transparent 55%)',
+            opacity: sparkPulse,
+            pointerEvents: 'none',
+          }}
+        />
+      )}
+      {bulbGlow > 0.02 && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(circle at 67% 22%, rgba(254, 240, 138, 0.22) 0%, rgba(245, 158, 11, 0.06) 55%, transparent 85%)',
+            opacity: bulbGlow,
+            pointerEvents: 'none',
+          }}
+        />
+      )}
+
       <VidyuterKineticTitle frame={local} startFrame={8} endFrame={ACT1.nightEnd} lines={[{ text: 'শীতের রাত', highlight: 'রাত', sizePx: 64 }]} x={90} y={100} accentColor="#BAE6FD" variant="slide" />
       <VidyuterKineticTitle frame={local} startFrame={ACT1.spark} endFrame={ACT1.sparkEnd} lines={[{ text: 'চটপট! নীলচে স্ফুলিঙ্গ', highlight: 'স্ফুলিঙ্গ', sizePx: 62 }]} x={90} y={100} accentColor="#38BDF8" variant="spark" />
       <VidyuterKineticTitle frame={local} startFrame={ACT1.question} endFrame={ACT1.questionEnd + 18} lines={[{ text: 'আসলে বিদ্যুৎ কী?', highlight: 'কী?', sizePx: 68 }]} x={90} y={100} accentColor="#FBBF24" variant="spring" />

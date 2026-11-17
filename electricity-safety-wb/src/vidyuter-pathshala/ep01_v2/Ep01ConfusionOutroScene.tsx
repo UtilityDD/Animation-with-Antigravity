@@ -171,11 +171,12 @@ export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; d
               {/* Cutaway Wall Copper Wire */}
               <rect x="340" y="455" width="1240" height="90" rx="22" fill="#1E293B" stroke="#B45309" strokeWidth="6" />
               <rect x="360" y="470" width="1200" height="60" rx="14" fill="#451A03" opacity="0.6" />
-              {/* Electrons waiting -> pushed by "?" force wave */}
+              {/* Electrons waiting -> Chain-reaction momentum ripple as "?" collides */}
               {Array.from({ length: 12 }).map((_, i) => {
-                const ex = 430 + i * 98 + pushWave * 65;
-                const ey = 500 + Math.sin(frame * 0.25 + i) * 6;
-                return <circle key={i} cx={ex} cy={ey} r="13" fill="#38BDF8" filter="drop-shadow(0 0 10px #38BDF8)" />;
+                const rippleT = Math.max(0, Math.min(1, (pushWave * 1.6) - i * 0.065));
+                const ex = 430 + i * 98 + rippleT * 78;
+                const ey = 500 + Math.sin(frame * 0.25 + i) * 5 - Math.sin(rippleT * Math.PI) * 7;
+                return <circle key={i} cx={ex} cy={ey} r={13 + Math.sin(rippleT * Math.PI) * 2.5} fill="#38BDF8" filter="drop-shadow(0 0 10px #38BDF8)" />;
               })}
               {/* Giant Pulsing "?" Force Pushing from Left */}
               <g transform={`translate(${275 + pushWave * 45}, 500)`}>
