@@ -1,0 +1,35 @@
+1
+00:00:00,500 --> 00:00:03,800
+বর্ষার ঝড়ে ছেঁড়া বিদ্যুতের তারে লুকিয়ে থাকে এক অদৃশ্য মারণফাঁদ।
+(In a monsoon storm, a snapped live wire hides an invisible, deadly trap.)
+
+2
+00:00:04,200 --> 00:00:11,500
+ভেজা মাটিতে পা ফেলা মাত্রই তৈরি হতে পারে মারাত্মক বিপদ। কেন সাধারণ হাঁটা এখানে প্রাণঘাতী?
+(Stepping onto wet ground near a wire can be fatal. Why is walking normally so dangerous?)
+
+3
+00:00:12,000 --> 00:00:24,500
+এর বৈজ্ঞানিক কারণ—ধাপ বিভব বা স্টেপ পটেনশিয়াল। তারের চারপাশের মাটিতে ভোল্টেজের বলয় ছড়িয়ে পড়ে। দুই পা ফাঁক করে হাঁটলে দুই পায়ের বিভব পার্থক্যে শরীরের ভেতর দিয়ে বিদ্যুৎ প্রবাহিত হয়।
+(The science behind this is Step Potential. Voltage spreads in concentric rings across wet ground. Walking wide creates a voltage difference that forces current through your body.)
+
+4
+00:00:25,000 --> 00:00:37,500
+বাঁচার একমাত্র উপায়—খরগোশ লাফ বা পা ঘষে চলা! দুই পা একসাথে জোড়া রাখলে বিভব পার্থক্য থাকে শূন্য। পা জোড়া রেখে লাফিয়ে অন্তত ত্রিশ ফুট বা দশ মিটার দূরে যাও।
+(The only escape is the Bunny Hop or shuffle! Keeping both feet tightly joined keeps the voltage difference at zero. Hop at least 30 feet or 10 meters away.)
+
+5
+00:00:38,000 --> 00:00:47,500
+ভেজা হাতে কখনও সুইচ স্পর্শ করবে না। আর জমা জলে দাঁড়িয়ে বিদ্যুতের খুঁটি বা টানা তার হাত দিয়ে ধরা চরম বিপজ্জনক।
+(Never touch switches with wet hands. And never touch electric poles or stay-wires in waterlogged conditions.)
+
+6
+00:00:48,000 --> 00:00:55,000
+কাউকে কারেন্ট স্পর্শ করলে খালি হাতে ধরবে না! দ্রুত মেন সুইচ বন্ধ করো এবং শুকনো বাঁশ দিয়ে তাকে আলাদা করো।
+(Never touch a shock victim bare-handed! Turn off the Main Switch instantly and separate with dry bamboo.)
+
+7
+00:00:55,500 --> 00:00:59,600
+বিপদ দেখলেই ফোন করো পশ্চিমবঙ্গ বিদ্যুৎ বন্টন নিগমের টোল-ফ্রি নম্বর ১৯১২১-এ। সতর্কতাই জীবন রক্ষা!
+(Report dangers immediately to WBSEDCL Helpline 19121. Safety saves lives!)
+

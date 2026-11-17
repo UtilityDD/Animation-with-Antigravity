@@ -1,0 +1,32 @@
+{
+  "stage1_volta": {
+    "duration_s": 34.96,
+    "frames_60fps": 2098,
+    "recommended_beat_frames": 2116
+  },
+  "stage2_timeline": {
+    "duration_s": 32.08,
+    "frames_60fps": 1925,
+    "recommended_beat_frames": 1943
+  },
+  "stage3_crashzoom": {
+    "duration_s": 15.44,
+    "frames_60fps": 926,
+    "recommended_beat_frames": 944
+  },
+  "stage4a_copper": {
+    "duration_s": 24.96,
+    "frames_60fps": 1498,
+    "recommended_beat_frames": 1516
+  },
+  "stage4b_marble_ammeter": {
+    "duration_s": 35.44,
+    "frames_60fps": 2126,
+    "recommended_beat_frames": 2144
+  },
+  "stage4c_recap_teaser": {
+    "duration_s": 17.12,
+    "frames_60fps": 1027,
+    "recommended_beat_frames": 1045
+  }
+}

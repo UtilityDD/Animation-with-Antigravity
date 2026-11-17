@@ -1,0 +1,33 @@
+{
+  "name": "shuktara-bidyut-suraksha-animation",
+  "version": "1.0.0",
+  "description": "3-Minute 2.5D Animated Motion Graphic Film on Electrical Safety & Monsoon Precautions for Rural West Bengal Students",
+  "private": true,
+  "scripts": {
+    "start": "remotion studio src/index.ts",
+    "build": "remotion render src/index.ts ElectricitySafetyWB dist/electricity_safety_wb_rural.mp4 --concurrency=4 --gl=angle",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.242",
+    "@remotion/media-utils": "4.0.242",
+    "@remotion/player": "4.0.242",
+    "@remotion/three": "4.0.242",
+    "@react-three/fiber": "^8.17.10",
+    "canvas-confetti": "^1.9.3",
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.242",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/canvas-confetti": "^1.6.4",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.170.0",
+    "typescript": "^5.7.2"
+  }
+}
+

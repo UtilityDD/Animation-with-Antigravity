@@ -1,0 +1,37 @@
+{
+  "stage1_manchester": {
+    "duration_s": 42.8,
+    "frames_60fps": 2568,
+    "recommended_beat_frames": 2586
+  },
+  "stage2_timeline": {
+    "duration_s": 47.28,
+    "frames_60fps": 2837,
+    "recommended_beat_frames": 2855
+  },
+  "stage3_bridge": {
+    "duration_s": 19.44,
+    "frames_60fps": 1166,
+    "recommended_beat_frames": 1184
+  },
+  "stage4a_stadium": {
+    "duration_s": 38.16,
+    "frames_60fps": 2290,
+    "recommended_beat_frames": 2308
+  },
+  "stage4b_ledger": {
+    "duration_s": 39.04,
+    "frames_60fps": 2342,
+    "recommended_beat_frames": 2360
+  },
+  "stage4c_comb_solved": {
+    "duration_s": 37.28,
+    "frames_60fps": 2237,
+    "recommended_beat_frames": 2255
+  },
+  "stage4d_teaser": {
+    "duration_s": 30.64,
+    "frames_60fps": 1838,
+    "recommended_beat_frames": 1856
+  }
+}

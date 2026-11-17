@@ -1,0 +1,20 @@
+# Dependencies & Build Outputs
+node_modules/
+electricity-safety-wb/build/
+electricity-safety-wb/dist/
+electricity-safety-wb/.remotion/
+.remotion/
+__pycache__/
+*.pyc
+
+# Secrets & API Keys
+*API.txt
+*_API.txt
+.env
+.env.*
+
+# Large Rendered Video Artifacts (>50MB)
+*.mp4
+*.mov
+*.wav
+VIDYUTER_PATHSHALA/renders/final/

@@ -1,0 +1,32 @@
+{
+  "episode": "ep01_v2",
+  "scene_duration_ms": 21000,
+  "beats": [
+    { "id": "b1", "start_ms": 0, "end_ms": 1800, "tag": "[WHISPERED]", "display_bn": "শীতের রাত।", "tts_bn": "শীতের রাত।" },
+    { "id": "b2", "start_ms": 1800, "end_ms": 3600, "tag": "[WHISPERED]", "display_bn": "ঘরের আলো নেভানো।", "tts_bn": "ঘরের আলো নেভানো।" },
+    { "id": "b3", "start_ms": 3600, "end_ms": 5700, "tag": "[CURIOUS]", "display_bn": "সিন্থেটিক কম্বল সরাতেই—", "tts_bn": "গা থেকে সিন্থেটিক কম্বলটা সরাতেই—" },
+    { "id": "b4", "start_ms": 5700, "end_ms": 7600, "tag": "[CURIOUS]", "display_bn": "চটপট! নীলচে স্ফুলিঙ্গ!", "tts_bn": "চটপট! ছোট্ট নীলচে স্ফুলিঙ্গ!" },
+    { "id": "b5", "start_ms": 7600, "end_ms": 9700, "tag": "[FOCUS]", "display_bn": "পাশের সুইচটা টিপতেই—", "tts_bn": "আবার পাশের সুইচটা টিপতেই—" },
+    { "id": "b6", "start_ms": 9700, "end_ms": 11800, "tag": "[FOCUS]", "display_bn": "বাল্বটা জ্বলে উঠল!", "tts_bn": "মাথার ওপরের বাল্বটা জ্বলে উঠল!" },
+    { "id": "b7", "start_ms": 11800, "end_ms": 13900, "tag": "[SKEPTIC]", "display_bn": "দুটো কি একই জিনিস?", "tts_bn": "দুটো কি একই জিনিস?" },
+    { "id": "b8", "start_ms": 13900, "end_ms": 16100, "tag": "[CURIOUS]", "display_bn": "কম্বলের ওই চমক", "tts_bn": "কম্বলের ওই ছোট্ট চমক" },
+    { "id": "b9", "start_ms": 16100, "end_ms": 18300, "tag": "[CURIOUS]", "display_bn": "দেয়ালের সুইচের শক্তি", "tts_bn": "আর দেয়ালের সুইচের পেছনে লুকানো শক্তি—" },
+    { "id": "b10", "start_ms": 18300, "end_ms": 20500, "tag": "[CURIOUS]", "display_bn": "আসলে বিদ্যুৎ কী?", "tts_bn": "আসলে বিদ্যুৎ কী?" }
+  ],
+  "camera_keyframes": [
+    { "ms": 0, "x": 0, "y": 0, "z": 1.0 },
+    { "ms": 3600, "x": -120, "y": -40, "z": 1.18 },
+    { "ms": 5700, "x": -220, "y": -70, "z": 1.85 },
+    { "ms": 9700, "x": 280, "y": -30, "z": 1.35 },
+    { "ms": 13900, "x": 240, "y": -90, "z": 1.18 },
+    { "ms": 18300, "x": 0, "y": -40, "z": 1.08 },
+    { "ms": 21000, "x": 0, "y": -20, "z": 1.12 }
+  ],
+  "kinetic_words": [
+    { "text": "শীতের রাত", "appear_ms": 100, "emphasize_start_ms": 250, "emphasize_end_ms": 1400, "remove_ms": 1750 },
+    { "text": "চটপট!", "appear_ms": 5600, "emphasize_start_ms": 5750, "emphasize_end_ms": 6900, "remove_ms": 7400 },
+    { "text": "স্ফুলিঙ্গ", "appear_ms": 6100, "emphasize_start_ms": 6400, "emphasize_end_ms": 7300, "remove_ms": 7550 },
+    { "text": "সুইচ", "appear_ms": 7600, "emphasize_start_ms": 8000, "emphasize_end_ms": 9200, "remove_ms": 9600 },
+    { "text": "বিদ্যুৎ কী?", "appear_ms": 18300, "emphasize_start_ms": 18600, "emphasize_end_ms": 20200, "remove_ms": 20850 }
+  ]
+}
