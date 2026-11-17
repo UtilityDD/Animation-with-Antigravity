@@ -53,7 +53,7 @@ export const Ep01V2Intro: React.FC<{ frame: number }> = ({ frame }) => {
           বিদ্যুতের <span style={{ color: '#38BDF8' }}>পাঠশালা</span>
         </div>
         <div style={{ marginTop: 46, fontSize: 52, fontWeight: 700, color: '#FDE68A', transform: `translateY(${epY}px)`, opacity: epAlpha }}>
-          অধ্যায় ০১ • বিদ্যুৎ আসলে কী?
+          অধ্যায় 01 • বিদ্যুৎ আসলে কী?
         </div>
       </div>
     </div>

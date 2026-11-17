@@ -54,3 +54,4 @@ Blocks export if any of the 5 checks fail:
 3. `Z0–Z3` depth layer presence in every scene component
 4. Simultaneous `<KineticWord>` cap (`<= 3`)
 5. `bn-IN` lexicon & zero raw 4-digit years in `tts_bn`
+- **On-Screen Numerals:** All on-screen numbers (`display_bn`, kinetic triggers, timeline dates, meter dials) MUST use English/Arabic numerals (`0–9`).
