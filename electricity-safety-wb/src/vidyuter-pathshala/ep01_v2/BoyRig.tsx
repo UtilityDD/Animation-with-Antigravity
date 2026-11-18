@@ -21,7 +21,9 @@ export const BoyRig: React.FC<{
   pose: BoyPose;
   scale?: number;
   opacity?: number;
-}> = ({ pose, scale = 1.0, opacity = 1.0 }) => {
+  /** Hide the screen-right arm so a scene can draw its own (e.g. holding a comb). */
+  hideRightArm?: boolean;
+}> = ({ pose, scale = 1.0, opacity = 1.0, hideRightArm = false }) => {
   const {
     worldX,
     worldY,
@@ -87,7 +89,7 @@ export const BoyRig: React.FC<{
           <path d="M -32,2 Q 0,28 32,2" fill="none" stroke="#1E40AF" strokeWidth="2" strokeLinecap="round" />
 
           {/* Articulated Right Arm lifting blanket corner */}
-          <g transform={`translate(82, 36) rotate(${-26 - armLift * 36})`}>
+          <g transform={`translate(82, 36) rotate(${-26 - armLift * 36})`} display={hideRightArm ? 'none' : undefined}>
             <rect x="-16" y="0" width="32" height="114" rx="14" fill="url(#boySweaterP)" stroke="#1E3A8A" strokeWidth="1.8" />
             <rect x="-15" y="98" width="30" height="14" rx="4" fill="#93C5FD" opacity="0.85" />
             <ellipse cx="0" cy="124" rx="14" ry="15" fill="url(#boySkinP)" />

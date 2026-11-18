@@ -1,14 +1,56 @@
 import React from 'react';
-import { DustMotes, EASE_OUT, ci } from '../historical/scene1/Scene1Shared';
-import { DepthLayer, KineticWord, MultiplaneCameraRig } from '../core/MultiplaneCameraRig';
-import { VidyuterKineticTitle } from '../historical/VidyuterBanglaKinetic';
+import { DustMotes, EASE_INOUT, EASE_OUT, ci } from '../historical/scene1/Scene1Shared';
+import { DepthLayer, KineticWord, MultiplaneCameraRig, type MultiplaneCamKey } from '../core/MultiplaneCameraRig';
+import { BoyRig } from './BoyRig';
+import { EASE_POP, NeutralAtomCloud } from './Ep01SharedGraphics';
+import { crackleIntensity } from './Ep01WinterHookScene';
+import {
+  BedWithBlanket,
+  BedroomFarWall,
+  BedroomForeground,
+  BedroomMidground,
+  BulbLightWash,
+  PHONE,
+  WallCircuit,
+  WorldTag,
+} from './Ep01BedroomSet';
 
 /**
- * ACT 4: Constructive Confusion Finale & Episode 02 Teaser
- * - 0..24%: 3-Icon Visual Recap
- * - 24..76%: Spinning Indian kWh Electric Meter & 0% Phone Battery Paradox + 4.5s Thinking Ring
- * - 76..100%: Luminous Electron-Cloud Atom Episode 02 Teaser («পরমাণু ও বৈদ্যুতিক চার্জ»)
+ * ACT 4 cue sheet (act4_confusion.mp3, local frames @60fps, from VO pauses):
+ *  0–130 "আজ আমরা দেখলাম বৈদ্যুতিক চার্জ," · 143–261 "স্থির তড়িৎ এবং তড়িৎ প্রবাহ।"
+ *  296–389 "কিন্তু এতক্ষণ যা জানলেন," · 412–539 "… একটা খটকা লাগছে?"
+ *  575–836 "যদি বাল্ব একটাও ইলেকট্রন খরচ না করে— সবটাই … ফিরে যায়—"
+ *  859–1034 "তবে প্রতি মাসে … বিল আসে কেন?"     1072–1220 "ফোনের ব্যাটারিই বা শূন্য শতাংশে …?"
+ *  1257–1374 "আর দেয়ালের তারে তো কেউ চিরুনি ঘষছে না—" · 1396–1540 "… ধাক্কাটা দিচ্ছে কে?"
+ *  1567–1599 "চিন্তা নেই—" · 1620–1823 "পরের পর্বগুলোতে …" · 1858–1940 "দেখা হচ্ছে দ্বিতীয় পর্বে—" · 1964 "পরমাণু ও বৈদ্যুতিক চার্জ।"
  */
+const A4 = { recap: [40, 150, 205], khotka: 412, p1: 575, bill: 859, p2: 1072, p3: 1257, push: 1396, calm: 1567, answer: 1620, teaser: 1858 };
+
+const centreOn = (f: number, X: number, Y: number, z: number, extra: Partial<MultiplaneCamKey> = {}): MultiplaneCamKey => ({
+  f,
+  x: (X - 960) * z,
+  y: (Y - 540) * z,
+  z,
+  ...extra,
+});
+
+const BILL_REST = { x: 770, y: 585 };
+const PHONE_HERO = { x: 430, y: 500 };
+const WIRE_SPOT = { x: 1465, y: 380 };
+
+/** Episode where each paradox gets answered (see MASTER_CURRICULUM) — stamped onto the object. */
+const EpisodeChip: React.FC<{ local: number; at: number; x: number; y: number; text: string; color: string }> = ({ local, at, x, y, text, color }) => {
+  if (local < at) return null;
+  const s = ci(local, [at, at + 18], [1.8, 1], EASE_POP);
+  const a = ci(local, [at, at + 8], [0, 1]);
+  return (
+    <g transform={`translate(${x}, ${y}) rotate(-6) scale(${s.toFixed(3)})`} opacity={a}>
+      <rect x="-74" y="-25" width="148" height="48" rx="24" fill={color} stroke="#0F172A" strokeWidth="3" />
+      <text x="0" y="9" textAnchor="middle" fill="#0F172A" fontSize="26" fontWeight="800">{text}</text>
+    </g>
+  );
+};
+
 export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; duration: number }> = ({
   frame,
   local,
@@ -16,143 +58,188 @@ export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; d
 }) => {
   const localMs = (local / 60) * 1000;
   const fadeIn = ci(local, [0, 20], [0, 1], EASE_OUT);
-  const showConfusion = local >= duration * 0.24 && local < duration * 0.78;
-  const showEp02Teaser = local >= duration * 0.78;
-  const meterSpin = (frame * 6) % 360;
-  const kwhNum = (428.0 + (local / duration) * 2.4).toFixed(1);
-  const batteryPct = Math.max(0, Math.round(ci(local, [duration * 0.35, duration * 0.65], [100, 0])));
-  const pauseRatio = ci(local, [duration * 0.56, duration * 0.76], [0, 1]);
+  const roomOut = ci(local, [A4.teaser - 30, A4.teaser + 6], [1, 0], EASE_INOUT);
+  const teaserIn = ci(local, [A4.teaser - 10, A4.teaser + 30], [0, 1], EASE_OUT);
+  const breath = Math.sin(frame * 0.05) * 2;
+
+  // recap, played out on the real objects
+  const charges = ci(local, [A4.recap[0], A4.recap[0] + 40, 380, 420], [0, 1, 1, 0]);
+  const crackle = crackleIntensity(local, [A4.recap[1], A4.recap[1] + 16, A4.recap[1] + 38]);
+  const flowFlare = ci(local, [A4.recap[2], A4.recap[2] + 20, 330, 380], [0.6, 1, 1, 0.6]);
+
+  // paradox 1: the bill drops onto the blanket
+  const billT = ci(local, [A4.bill - 14, A4.bill + 26], [0, 1], EASE_OUT);
+  const billY = BILL_REST.y - 700 * (1 - billT);
+  const billSway = (1 - billT) * Math.sin(local * 0.25) * 14;
+  // paradox 2: the phone rises from the nightstand, battery drains to 0
+  const phoneT = ci(local, [A4.p2 - 10, A4.p2 + 30], [0, 1], EASE_OUT);
+  const batteryPct = Math.round(ci(local, [A4.p2 + 30, A4.p2 + 140], [100, 0], EASE_INOUT));
+  const phoneDead = local > A4.p2 + 150;
+  // paradox 3: comb crossed out, a mystery "?" hand jabs at the wire
+  const combA = ci(local, [A4.p3 + 10, A4.p3 + 30], [0, 1]);
+  const combX = ci(local, [A4.p3 + 50, A4.p3 + 62], [0, 1]);
+  const pushA = ci(local, [A4.push, A4.push + 14], [0, 1]);
+  const jab = local >= A4.push ? Math.max(0, Math.sin((local - A4.push) * 0.18)) * 22 : 0;
+
+  // boy's gaze follows each mystery
+  const lookX = ci(local, [A4.khotka, A4.khotka + 30, A4.bill - 20, A4.bill + 20, A4.p2, A4.p2 + 30, A4.p3, A4.p3 + 30, A4.calm, A4.calm + 30], [0.3, -0.3, -0.3, 0.6, 0.6, -1, -1, 1, 1, 0]);
+  const lookY = ci(local, [A4.khotka, A4.khotka + 30, A4.bill - 20, A4.bill + 20, A4.p2, A4.p2 + 30, A4.p3, A4.p3 + 30, A4.calm, A4.calm + 30], [0.4, -0.9, -0.9, 0.8, 0.8, 0.1, 0.1, -0.7, -0.7, 0.3]);
+  const puzzled = local >= A4.bill && local < A4.calm;
+  const thought = ci(local, [A4.khotka, A4.khotka + 24, 560, 590], [0, 1, 1, 0]);
+
+  const keys: MultiplaneCamKey[] = [
+    centreOn(0, 960, 500, 1.0, { rotateY: -1.0 }),
+    centreOn(370, 900, 500, 1.06, { rotateY: 0 }),
+    centreOn(A4.khotka + 50, 650, 430, 1.45, { rotateY: 0.8, stop: true }),
+    // "যদি বাল্ব একটাও ইলেকট্রন খরচ না করে…"
+    centreOn(A4.p1 + 40, 1330, 330, 1.3, { rotateY: -0.8 }),
+    centreOn(830, 1310, 340, 1.34, { rotateY: -0.4, stop: true }),
+    centreOn(A4.bill + 30, 720, 520, 1.3, { rotateY: 0.6, stop: true }),
+    centreOn(A4.p2 + 30, 470, 520, 1.32, { rotateY: 1.0, stop: true }),
+    centreOn(A4.p3 + 30, 1390, 390, 1.32, { rotateY: -1.0 }),
+    centreOn(1530, 1400, 380, 1.4, { rotateY: -0.6, stop: true }),
+    centreOn(A4.calm + 40, 960, 470, 1.0, { rotateY: 0, stop: true }),
+    centreOn(A4.teaser, 960, 470, 1.06, { rotateY: 0.4 }),
+  ];
 
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#050811', opacity: fadeIn, overflow: 'hidden' }}>
-      <MultiplaneCameraRig
-        local={local}
-        frame={frame}
-        keys={[
-          { f: 0, x: 0, y: 0, z: 1.0, rotateY: -1.2 },
-          { f: duration * 0.3, x: 0, y: 0, z: 1.08, rotateY: 0 },
-          { f: duration * 0.72, x: 0, y: -20, z: 1.14, rotateY: 1.4 },
-          { f: duration, x: 0, y: 0, z: 1.06, rotateY: 0 },
-        ]}
-      >
-        <DepthLayer plane="Z0">
-          <svg width="1920" height="1080">
-            <circle cx="960" cy="540" r="460" fill={showEp02Teaser ? 'rgba(56, 189, 248, 0.09)' : 'rgba(244, 63, 94, 0.08)'} />
-          </svg>
-        </DepthLayer>
+      {roomOut > 0 && (
+        <div style={{ position: 'absolute', inset: 0, opacity: roomOut, background: 'radial-gradient(ellipse at 65% 28%, #3A2A14 0%, #090B10 78%)' }}>
+          <MultiplaneCameraRig local={local} frame={frame} keys={keys} shakes={[{ f: A4.bill + 22, amp: 3, dur: 10 }]}>
+            <DepthLayer plane="Z0">
+              <BedroomFarWall frame={frame} />
+            </DepthLayer>
+            <DepthLayer plane="Z1">
+              <BedroomMidground frame={frame} hidePhone={phoneT > 0} />
+            </DepthLayer>
+            <DepthLayer plane="Z2">
+              <BoyRig
+                pose={{
+                  worldX: 350,
+                  worldY: 165,
+                  chestLeanDeg: puzzled ? 2 : 0,
+                  breathY: breath,
+                  headRollDeg: puzzled ? -6 : 3,
+                  eyeLookX: lookX,
+                  eyeLookY: lookY,
+                  blinkAmount: frame % 165 > 158 ? 1 : 0,
+                  expression: puzzled && (local < A4.bill + 90 || (local > A4.p2 + 140 && local < A4.p2 + 200)) ? 'surprised' : 'curious',
+                  armLift: 0.55,
+                }}
+                scale={0.76}
+              />
+              <svg width="1920" height="1080" viewBox="0 0 1920 1080" style={{ position: 'relative', zIndex: 2, overflow: 'visible' }}>
+                <rect x="380" y="758" width="540" height="80" fill="#14100D" />
+                <BedWithBlanket blanketLift={60} crackle={crackle} arcSeed={Math.floor(local / 2)} charges={charges} frame={frame} />
+                <WallCircuit frame={frame} closed front={0} flow={local < A4.recap[2] ? 0.6 : flowFlare} bulbGlow={1} xray={local >= A4.p3 ? ci(local, [A4.p3, A4.p3 + 30], [0, 1]) : 0} />
 
-        <DepthLayer plane="Z1">
-          <svg width="1920" height="1080">
-            <rect x="220" y="770" width="1480" height="260" fill="#0F172A" />
-          </svg>
-        </DepthLayer>
+                {/* recap tags, pinned to the objects */}
+                <WorldTag local={local} at={A4.recap[0]} until={380} text="বৈদ্যুতিক চার্জ" x={700} y={560} color="#F43F5E" dx={-60} dy={-170} size={28} />
+                <WorldTag local={local} at={A4.recap[1]} until={380} text="স্থির তড়িৎ" x={830} y={600} color="#38BDF8" dx={170} dy={-60} size={28} />
+                <WorldTag local={local} at={A4.recap[2]} until={380} text="তড়িৎ প্রবাহ" x={1465} y={330} color="#FBBF24" dx={150} dy={-40} size={28} />
 
-        <DepthLayer plane="Z2">
-          {!showConfusion && !showEp02Teaser && (
-            <svg width="1920" height="1080">
-              {[
-                { x: 480, label: 'বৈদ্যুতিক চার্জ', c: '#F43F5E' },
-                { x: 960, label: 'স্থির তড়িৎ', c: '#38BDF8' },
-                { x: 1440, label: 'তড়িৎ প্রবাহ', c: '#FBBF24' },
-              ].map((it) => (
-                <g key={it.label} transform={`translate(${it.x}, 520)`}>
-                  <circle cx="0" cy="0" r="95" fill="rgba(15,23,42,0.85)" stroke={it.c} strokeWidth="4" />
-                  <text x="0" y="155" textAnchor="middle" fill="#F8FAFC" fontSize="32" fontWeight="700" style={{ fontFamily: "'Hind Siliguri', sans-serif" }}>
-                    {it.label}
-                  </text>
-                </g>
-              ))}
-            </svg>
-          )}
+                {/* khotka: a big question mark in the boy's head */}
+                {thought > 0.01 && (
+                  <g opacity={thought}>
+                    <circle cx="665" cy="365" r="7" fill="#F8F1E3" />
+                    <circle cx="695" cy="335" r="11" fill="#F8F1E3" />
+                    <g transform={`translate(780, 260) scale(${ci(local, [A4.khotka, A4.khotka + 18], [0.6, 1], EASE_POP).toFixed(3)})`}>
+                      <ellipse cx="0" cy="0" rx="90" ry="62" fill="#F8F1E3" stroke="#CBD5E1" strokeWidth="2.5" />
+                      <text x="0" y="26" textAnchor="middle" fill="#F43F5E" fontSize="76" fontWeight="800">?</text>
+                    </g>
+                  </g>
+                )}
 
-          {showConfusion && (
-            <svg width="1920" height="1080">
-              <g transform="translate(560, 520)">
-                <rect x="-155" y="-185" width="310" height="370" rx="22" fill="#1E293B" stroke="#94A3B8" strokeWidth="5" />
-                <rect x="-132" y="-160" width="264" height="285" rx="14" fill="#0F172A" stroke="#334155" strokeWidth="2.5" />
-                <rect x="-105" y="-132" width="210" height="82" rx="8" fill="#022C22" stroke="#10B981" strokeWidth="2.5" />
-                <text x="0" y="-80" textAnchor="middle" fill="#6EE7B7" fontSize="30" fontWeight="800">{kwhNum} kWh</text>
-                <circle cx="80" cy="-16" r="7" fill="#EF4444" opacity={frame % 24 < 10 ? 1 : 0.2} />
-                <ellipse cx="0" cy="45" rx="86" ry="20" fill="#334155" stroke="#94A3B8" strokeWidth="3" />
-                <circle cx={Math.cos((meterSpin * Math.PI) / 180) * 68} cy="45" r="7" fill="#EF4444" />
-                {[-60, -20, 20, 60].map((tx) => (
-                  <rect key={tx} x={tx - 8} y="140" width="16" height="38" rx="3" fill="#D97706" />
-                ))}
-                <text x="0" y="245" textAnchor="middle" fill="#FDA4AF" fontSize="30" fontWeight="700" style={{ fontFamily: "'Hind Siliguri', sans-serif" }}>
-                  বিল আসে কেন?!
-                </text>
-              </g>
+                {/* the bulb hands every electron back — so what are we paying for? */}
+                {local >= A4.p1 && local < A4.bill + 40 && (
+                  <g opacity={ci(local, [A4.p1, A4.p1 + 20, A4.bill + 10, A4.bill + 40], [0, 1, 1, 0])}>
+                    <path d="M 1214,262 A 74,74 0 1,1 1346,262" fill="none" stroke="#10B981" strokeWidth="4" strokeDasharray="8 8" strokeDashoffset={-frame * 1.5} />
+                    <path d="M 1336,250 l 12,14 l 6,-18" fill="none" stroke="#10B981" strokeWidth="4" strokeLinecap="round" />
+                  </g>
+                )}
 
-              <g transform="translate(960, 520)">
-                <circle cx="0" cy="0" r="64" fill="none" stroke="#1E293B" strokeWidth="8" />
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="64"
-                  fill="none"
-                  stroke="#FBBF24"
-                  strokeWidth="8"
-                  strokeDasharray={402}
-                  strokeDashoffset={402 * (1 - pauseRatio)}
-                  transform="rotate(-90)"
-                />
-                <text x="0" y="14" textAnchor="middle" fill="#FDE68A" fontSize="42" fontWeight="800">?</text>
-              </g>
+                {/* Paradox 1 — the electricity bill drops onto the blanket */}
+                {billT > 0 && (
+                  <g transform={`translate(${(BILL_REST.x + billSway).toFixed(1)}, ${billY.toFixed(1)}) rotate(${(-8 + billSway * 0.6).toFixed(1)})`}>
+                    <rect x="-80" y="-104" width="160" height="208" rx="4" fill="#F8F5EC" stroke="#CBD5E1" strokeWidth="2" />
+                    <rect x="-80" y="-104" width="160" height="34" fill="#0369A1" />
+                    <text x="0" y="-80" textAnchor="middle" fill="#F8FAFC" fontSize="20" fontWeight="800">বিদ্যুৎ বিল</text>
+                    {[-52, -36, -20].map((y) => (
+                      <rect key={y} x="-62" y={y} width={y === -36 ? 80 : 110} height="6" rx="3" fill="#CBD5E1" />
+                    ))}
+                    <text x="0" y="18" textAnchor="middle" fill="#475569" fontSize="18" fontWeight="700">432 kWh</text>
+                    <text x="0" y="66" textAnchor="middle" fill="#B91C1C" fontSize="38" fontWeight="800">₹ 1,240</text>
+                  </g>
+                )}
 
-              <g transform="translate(1360, 520)">
-                <rect x="-95" y="-175" width="190" height="350" rx="26" fill="#0F172A" stroke="#64748B" strokeWidth="5" />
-                <rect x="-80" y="-155" width="160" height="310" rx="18" fill="#020617" />
-                <rect x="-26" y="-146" width="52" height="8" rx="4" fill="#334155" />
-                <rect x="-18" y="-66" width="36" height="10" rx="3" fill="#64748B" />
-                <rect x="-46" y="-56" width="92" height="132" rx="10" fill="none" stroke={batteryPct < 20 ? '#F43F5E' : '#10B981'} strokeWidth="4" />
-                <rect
-                  x="-38"
-                  y={70 - (batteryPct / 100) * 118}
-                  width="76"
-                  height={(batteryPct / 100) * 118}
-                  rx="6"
-                  fill={batteryPct < 20 ? '#F43F5E' : '#10B981'}
-                  opacity="0.45"
-                />
-                <text x="0" y="18" textAnchor="middle" fill={batteryPct < 20 ? '#F43F5E' : '#F8FAFC'} fontSize="34" fontWeight="800">
-                  {batteryPct}%
-                </text>
-                <text x="0" y="245" textAnchor="middle" fill="#BAE6FD" fontSize="30" fontWeight="700" style={{ fontFamily: "'Hind Siliguri', sans-serif" }}>
-                  ব্যাটারি 0% কেন?!
-                </text>
-              </g>
-            </svg>
-          )}
+                {/* Paradox 2 — the phone lifts off the nightstand and dies */}
+                {phoneT > 0 && (
+                  <g
+                    transform={`translate(${(PHONE.x + (PHONE_HERO.x - PHONE.x) * phoneT).toFixed(1)}, ${(PHONE.y + (PHONE_HERO.y - PHONE.y) * phoneT).toFixed(1)}) rotate(${(90 * (1 - phoneT) - 6 * phoneT).toFixed(1)}) scale(${(0.4 + 0.6 * phoneT).toFixed(3)})`}
+                  >
+                    <rect x="-62" y="-118" width="124" height="236" rx="18" fill="#0F172A" stroke="#38BDF8" strokeWidth="3" />
+                    <rect x="-54" y="-104" width="108" height="208" rx="10" fill={phoneDead ? '#020617' : '#0B1324'} />
+                    {!phoneDead && (
+                      <g>
+                        <rect x="-14" y="-52" width="28" height="8" rx="3" fill="#64748B" />
+                        <rect x="-32" y="-44" width="64" height="104" rx="8" fill="none" stroke={batteryPct < 20 ? '#F43F5E' : '#10B981'} strokeWidth="4" />
+                        <rect x="-26" y={54 - (batteryPct / 100) * 92} width="52" height={(batteryPct / 100) * 92} rx="5" fill={batteryPct < 20 ? '#F43F5E' : '#10B981'} opacity="0.5" />
+                        <text x="0" y="16" textAnchor="middle" fill={batteryPct < 20 ? '#FDA4AF' : '#F8FAFC'} fontSize="30" fontWeight="800">{batteryPct}%</text>
+                      </g>
+                    )}
+                  </g>
+                )}
 
-          {showEp02Teaser && (
-            <svg width="1920" height="1080">
-              <circle cx="960" cy="460" r="150" fill="rgba(56, 189, 248, 0.16)" stroke="#38BDF8" strokeWidth="2.5" strokeDasharray="8 6" />
-              <circle cx="954" cy="455" r="10" fill="#F43F5E" />
-              <circle cx="966" cy="465" r="10" fill="#F43F5E" />
-              {[0, 1, 2, 3].map((i) => {
-                const a = frame * 0.06 + i * 1.57;
-                return <circle key={i} cx={960 + Math.cos(a) * 110} cy={460 + Math.sin(a * 1.1) * 90} r="8" fill="#38BDF8" />;
-              })}
-              <text x="960" y="700" textAnchor="middle" fill="#FDE68A" fontSize="46" fontWeight="700" style={{ fontFamily: "'Hind Siliguri', sans-serif" }}>
-                পরবর্তী পর্ব 02 • পরমাণু ও বৈদ্যুতিক চার্জ
-              </text>
-            </svg>
-          )}
-        </DepthLayer>
+                {/* Paradox 3 — nobody is rubbing a comb on the wall wire… so who pushes? */}
+                {local >= A4.p3 && (
+                  <g>
+                    <g transform="translate(1610, 300) rotate(-12)" opacity={combA}>
+                      <rect x="-60" y="-14" width="120" height="16" rx="5" fill="#0284C7" />
+                      {Array.from({ length: 8 }).map((_, k) => (
+                        <rect key={k} x={-56 + k * 15} y="0" width="7" height="24" rx="2" fill="#0284C7" />
+                      ))}
+                      <line x1="-74" y1="-28" x2="74" y2="34" stroke="#F43F5E" strokeWidth="7" strokeLinecap="round" strokeDasharray="170" strokeDashoffset={170 * (1 - combX)} />
+                    </g>
+                    <g transform={`translate(${(WIRE_SPOT.x - 100 + jab).toFixed(1)}, ${WIRE_SPOT.y})`} opacity={pushA}>
+                      <path d="M -50,-16 L 4,-16 L 4,-30 L 40,0 L 4,30 L 4,16 L -50,16 Z" fill="#FBBF24" stroke="#0F172A" strokeWidth="3" />
+                      <text x="-20" y="11" textAnchor="middle" fill="#0F172A" fontSize="30" fontWeight="800">?</text>
+                    </g>
+                  </g>
+                )}
 
-        <DepthLayer plane="Z3">
-          <svg width="1920" height="1080">
-            <ellipse cx="120" cy="1020" rx="140" ry="200" fill="#050811" />
-          </svg>
-        </DepthLayer>
+                <EpisodeChip local={local} at={A4.answer + 10} x={BILL_REST.x + 10} y={BILL_REST.y - 140} text="পর্ব 16" color="#FDA4AF" />
+                <EpisodeChip local={local} at={A4.answer + 22} x={PHONE_HERO.x - 10} y={PHONE_HERO.y - 160} text="পর্ব 10" color="#BAE6FD" />
+                <EpisodeChip local={local} at={A4.answer + 34} x={WIRE_SPOT.x + 120} y={WIRE_SPOT.y - 170} text="পর্ব 05" color="#FDE68A" />
+              </svg>
+            </DepthLayer>
+            <DepthLayer plane="Z3">
+              <BedroomForeground />
+            </DepthLayer>
+            <DepthLayer plane="Z4">
+              <DustMotes frame={frame} cx={960} cy={520} radius={620} count={24} opacity={0.75} seed={40} />
+            </DepthLayer>
+          </MultiplaneCameraRig>
+          <BulbLightWash amount={0.75} />
+        </div>
+      )}
 
-        <DepthLayer plane="Z4">
-          <DustMotes frame={frame} cx={960} cy={520} radius={580} count={24} opacity={0.75} seed={40} />
-        </DepthLayer>
-      </MultiplaneCameraRig>
+      {/* Episode 02 end card */}
+      {teaserIn > 0.01 && (
+        <svg width="1920" height="1080" style={{ position: 'absolute', inset: 0 }} opacity={teaserIn}>
+          <g transform={`translate(960, 440) scale(${(0.7 + 0.3 * teaserIn + (local - A4.teaser) * 0.0006).toFixed(4)}) translate(-960, -440)`}>
+            <NeutralAtomCloud frame={frame} cx={960} cy={440} radius={210} cloudStrength={1} nucleusGlow={0.6} dots={130} />
+          </g>
+          <text x="960" y="740" textAnchor="middle" fill="#94A3B8" fontSize="30" fontWeight="700" opacity={ci(local, [1900, 1925], [0, 1])}>
+            পরবর্তী পর্ব 02
+          </text>
+          <text x="960" y="810" textAnchor="middle" fill="#FDE68A" fontSize="56" fontWeight="800" opacity={ci(local, [1964, 1990], [0, 1])}>
+            পরমাণু ও বৈদ্যুতিক চার্জ
+          </text>
+        </svg>
+      )}
 
-      <VidyuterKineticTitle frame={local} startFrame={510} endFrame={1640} lines={[{ text: 'মনে খটকা লাগছে?', highlight: 'খটকা', sizePx: 66 }]} align="center" x={960} y={80} accentColor="#F43F5E" variant="spring" />
-      <KineticWord localMs={localMs} appearMs={5800} emphasizeStartMs={6200} emphasizeEndMs={12000} removeMs={13500} text="পরের পর্বে উত্তর!" x={960} y={930} accentColor="#38BDF8" mode="SCALE_GLOW" />
+      <KineticWord localMs={localMs} appearMs={27000} emphasizeStartMs={27300} emphasizeEndMs={30200} removeMs={30700} text="পরের পর্বগুলোতে উত্তর!" x={960} y={960} accentColor="#38BDF8" mode="SCALE_GLOW" />
     </div>
   );
 };

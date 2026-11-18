@@ -2,22 +2,36 @@
 ## Everyday Sensory Mystery × Hard-Rock Microscopic Physics × Constructive Confusion
 
 **Series:** বিদ্যুতের পাঠশালা (50-Episode Flagship Indian Bengali Science Series)  
-**Master Spec:** `1920 × 1080` (4K-scalable SVG) | `60 fps CFR` | `Rec.709` | `H.264 High (CRF 16–18)` | `AAC 48kHz 320kbps` | `-14 LUFS`
+**Master Spec:** `1920 × 1080` (4K-scalable SVG) | `60 fps CFR` | `Rec.709` | `H.264 High (CRF 16–18)` | `AAC 48kHz 320kbps` | `-14 LUFS`  
+**Target Runtime:** `3:30` (±15s) per episode — sized to ~3:00 of narration + ~30s of visual-only "breathing" shots.
 
 ---
 
 ## 1. UNIVERSAL 4-ACT EPISODE STRUCTURE (ALL 50 EPISODES)
-1. **ACT 1: THE EVERYDAY SENSORY HOOK (`00:00 – 00:35`)**
+Runtime budget = narration (VO) + visual-only time (no VO: holds, hero shots, transitions, end card). Visual-only time is **planned per shot**, never padded onto the end of a scene as dead air.
+
+| Segment | Window | Total | VO | Visual-only (planned) |
+|---|---|---|---|---|
+| Series intro | `00:00 – 00:05` | 5s | — | 5s মাত্রা-reveal title card |
+| Act 1 Hook | `00:05 – 00:28` | 23s | ~20s | 3s hold on the bulb-on light flood |
+| Act 2 Flashback + Timeline | `00:28 – 01:32` | 64s | ~59s | 4s globe-dive / timeline transitions |
+| Act 3 Micro-physics | `01:32 – 02:44` | 72s | ~58s | 10s drift-vs-push hero shot + 4s match-cut transitions |
+| Act 4 Confusion + Hook | `02:44 – 03:30` | 46s | ~35s | 6s thinking pause + 5s end card |
+
+1. **ACT 1: THE EVERYDAY SENSORY HOOK (`00:05 – 00:28`)**
    - Atmospheric everyday Indian setting (`Z0–Z4` depth) zooming immediately into a minute physical anomaly (winter blanket sparks, modular 6A wall switch, kettle boiling জল). Zero textbook terms.
-2. **ACT 2: THE HUMAN DETECTIVE FLASHBACK & TOPIC TIMELINE (`00:35 – 02:05`)**
+2. **ACT 2: THE HUMAN DETECTIVE FLASHBACK & TOPIC TIMELINE (`00:28 – 01:32`)**
    - Continuous 2.5D **Rotating Globe → Country → Rooftop → Window Crash-Dive** into genuine historical experiment.
    - Expressive rigged character acting (`curiosity → frustration → awe`, OTS POVs, zero invented dialogue) + broken-axis (`//`) topic timeline.
-3. **ACT 3: MINUTE-DETAIL MICROSCOPIC PHYSICS (`02:05 – 06:40`)**
+   - Timeline: max `8–9` milestones, `~4s` per milestone; every milestone named in VO must be on screen while it is spoken.
+3. **ACT 3: MINUTE-DETAIL MICROSCOPIC PHYSICS (`01:32 – 02:44`)**
    - Macro crash-zoom into hardware cutaways & microscopic realism (no Bohr rings, no "bulbs eat electrons", distinguish slow drift vs near-light-speed field push).
+   - **Max 3 concepts** at this length, each with one hero shot (~20–25s each), linked by match-cuts (never fades through black).
    - **90/10 visual-to-text ratio**: zero full sentences or bullet lists on screen.
-4. **ACT 4: CONSTRUCTIVE CONFUSION & NEXT-COURSE HOOK (`06:40 – 08:00`)**
-   - 3-icon visual anchor (`10–15s`), followed by **"এতক্ষণ যা জানলেন, তাতে আপনার মনে কি এখন একটা খটকা লাগছে?"**
-   - Present `2–3` razor-sharp unresolved paradoxes triggered by the lesson, and reassure learners that every puzzle unlocks in upcoming courses.
+4. **ACT 4: CONSTRUCTIVE CONFUSION & NEXT-COURSE HOOK (`02:44 – 03:30`)**
+   - 3-icon visual anchor (`6–8s`), followed by **"এতক্ষণ যা জানলেন, তাতে আপনার মনে কি এখন একটা খটকা লাগছে?"**
+   - Present `2–3` razor-sharp unresolved paradoxes triggered by the lesson — **one visual per paradox spoken** — and reassure learners that every puzzle unlocks in upcoming courses.
+   - Close on a `5s` end card: next-episode title + series mark.
 
 ---
 

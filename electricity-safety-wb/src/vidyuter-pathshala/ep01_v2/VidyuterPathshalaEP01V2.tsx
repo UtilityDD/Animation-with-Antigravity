@@ -3,9 +3,9 @@ import { Audio, Loop, Sequence, staticFile, useCurrentFrame } from 'remotion';
 import { FontInjector } from '../../kinetic-master/FontInjector';
 import { FilmGrade } from '../historical/scene1/Scene1Shared';
 import { Ep01V2Intro } from './Ep01V2Intro';
-import { Ep01WinterHookScene } from './Ep01WinterHookScene';
+import { ACT1_CUES, Ep01WinterHookScene } from './Ep01WinterHookScene';
 import { Ep01BrokenTimelineScene, Ep01MiletusScene } from './Ep01MiletusAndTimelineScene';
-import { Ep01MicroPhysicsScene, Ep01SwitchBulbScene } from './Ep01MicroPhysicsScene';
+import { ACT3E_CUES, Ep01MicroPhysicsScene, Ep01SwitchBulbScene } from './Ep01MicroPhysicsScene';
 import { Ep01ConfusionOutroScene } from './Ep01ConfusionOutroScene';
 
 export const EP01_V2_DURATIONS = {
@@ -41,6 +41,8 @@ export const VidyuterPathshalaEP01V2: React.FC = () => {
   return (
     <div style={{ position: 'relative', width: 1920, height: 1080, backgroundColor: '#050811', overflow: 'hidden' }}>
       <FontInjector />
+      {/* SVG <text> otherwise falls back to Times New Roman; tabular figures keep counters from jittering */}
+      <style>{`svg text { font-family: 'Hind Siliguri', 'Noto Sans Bengali', sans-serif; font-variant-numeric: tabular-nums; }`}</style>
 
       <Loop durationInFrames={1920}>
         <Audio src={staticFile('vidyuter-pathshala/audio/ep01_doc/sfx/ep01_ambient_bed.mp3')} volume={0.11} />
@@ -52,10 +54,17 @@ export const VidyuterPathshalaEP01V2: React.FC = () => {
 
       <Sequence from={f1} durationInFrames={EP01_V2_DURATIONS.act1}>
         <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/act1_hook.mp3')} volume={1.0} />
-        <Sequence from={320} durationInFrames={30}>
+        {/* SFX cued to VO: "চটপট!" @5.57s (334f), whip-pan @470f, switch press @590f */}
+        <Sequence from={ACT1_CUES.snap} durationInFrames={30}>
           <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/sfx_blanket_snap.mp3')} volume={0.35} />
         </Sequence>
-        <Sequence from={540} durationInFrames={24}>
+        <Sequence from={ACT1_CUES.snap} durationInFrames={90}>
+          <Audio src={staticFile('vidyuter-pathshala/audio/ep01_doc/sfx/sfx_spark_crackle.mp3')} volume={0.3} />
+        </Sequence>
+        <Sequence from={ACT1_CUES.whip - 6} durationInFrames={60}>
+          <Audio src={staticFile('vidyuter-pathshala/audio/ep01_doc/sfx/sfx_whoosh_dive.mp3')} volume={0.22} />
+        </Sequence>
+        <Sequence from={ACT1_CUES.switchPress} durationInFrames={24}>
           <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/sfx_switch_click.mp3')} volume={0.38} />
         </Sequence>
         <Ep01WinterHookScene frame={frame} local={frame - f1} duration={EP01_V2_DURATIONS.act1} />
@@ -78,6 +87,9 @@ export const VidyuterPathshalaEP01V2: React.FC = () => {
 
       <Sequence from={f3e} durationInFrames={EP01_V2_DURATIONS.act3e}>
         <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/act3e_switch_bulb.mp3')} volume={1.0} />
+        <Sequence from={ACT3E_CUES.press + 8} durationInFrames={24}>
+          <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/sfx_switch_click.mp3')} volume={0.38} />
+        </Sequence>
         <Ep01SwitchBulbScene frame={frame} local={frame - f3e} duration={EP01_V2_DURATIONS.act3e} />
       </Sequence>
 
