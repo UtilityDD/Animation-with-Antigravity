@@ -37,7 +37,7 @@ OUT_MUSIC = AUD / "ep01_v2" / "music"
 OUT_FX = AUD / "ep01_v2" / "fx"
 
 # EP01_V2_DURATIONS (VidyuterPathshalaEP01V2.tsx)
-DUR = dict(intro=180, act1=1218, act2a=1372, act2b=2192, act3=1664, act3e=1837, act4=2106)
+DUR = dict(intro=180, act1=1300, act2a=1540, act2b=2528, act3=1664, act3e=1837, act4=3061)
 ORDER = ["intro", "act1", "act2a", "act2b", "act3", "act3e", "act4"]
 VO = dict(
     act1="ep01_v2/act1_hook.mp3",
@@ -880,19 +880,19 @@ def build_intro():
 
 
 # ============================================================================ ACT 1 — winter bedroom hook
-A1 = dict(rustle=(195, 322), snap=334, bursts=[351, 372, 398, 426], whip=470, press=590, bulb=626, bubble=771, hook=1100)
+A1 = dict(rustle=(215, 352), snap=364, bursts=[381, 402, 428, 456], whip=512, press=640, bulb=676, bubble=814, hook=1205)
 
 
 def music_act1():
     fr = DUR["act1"]
     b = Bus(fr)
     b.add(pad([38, 50, 53, 57, 60, 64], T(A1["press"]) - 0.2, att=2.5, rel=1.2, bright=0.35), 0, -4)
-    motif = [(0.9, 74), (1.6, 77), (2.3, 81), (3.0, 79), (3.9, 77), (4.6, 74), (8.7, 72), (9.3, 74)]
+    motif = [(0.9, 74), (1.6, 77), (2.3, 81), (3.0, 79), (3.9, 77), (4.6, 74), (9.2, 72), (9.8, 74)]
     for s, m in motif:
         b.at(s, mallet(m, 1.8, ratio=4.0, index=1.0, tau=0.7), -10, 0.3)
     # switch -> bulb: warm swell
     b.add(pad([46, 50, 53, 57, 62], 4.0, att=0.6, rel=1.0, bright=0.55, seed=2), A1["bulb"] - 6, -3)
-    b.add(pad([45, 53, 57, 60, 65], 4.2, att=1.0, rel=1.2, bright=0.5, seed=3), 840, -4)
+    b.add(pad([45, 53, 57, 60, 65], 4.2, att=1.0, rel=1.2, bright=0.5, seed=3), A1["bubble"] + 40, -4)
     for i, m in enumerate([62, 65, 69, 72, 74]):
         b.add(mallet(m, 2.0, tau=0.9), A1["bulb"] + i * 7, -9, -0.4 + i * 0.2)
     for i in range(14):
@@ -938,7 +938,7 @@ def fx_act1():
 
 
 # ============================================================================ ACT 2A — globe dive → Miletus
-M = dict(lock=85, dive=(65, 195), cloud=(170, 210), reveal=250, rubFast=520, rubStop=690, reachEnd=785, quiver=766, macroIn=790, macroOut=905, launch=[846, 874, 914, 932], fly=20, woolDrop=922, settle=1080)
+M = dict(lock=85, dive=(65, 195), cloud=(170, 210), reveal=270, rubFast=420, rubStop=590, reachEnd=662, quiver=640, macroIn=664, macroOut=775, launch=[712, 740, 786, 804], fly=20, woolDrop=795, thales=812, settle=950, ponder=1242, glimpse=1400)
 
 
 def rub_unwrapped(l: float) -> float:
@@ -996,6 +996,13 @@ def music_act2a():
     b.add(shimmer(2.5, [78, 81, 86, 90], 12, 8), M["macroOut"] + 10, -14)
     for k, m in enumerate([62, 66, 69, 74, 69, 66, 62, 66, 69, 74, 69, 66]):
         b.at(T(M["settle"]) + 0.2 + k * 0.42, ks_pluck(m, 1.6, 0.45, seed=40 + k), -12, 0.2)
+    # "তখন কেউ জানত না…" — open, unresolved fifths while he studies the amber
+    b.add(pad([38, 45, 52, 57], T(M["glimpse"] - M["ponder"]) + 0.6, att=0.8, rel=1.0, bright=0.35, seed=9), M["ponder"] - 10, -6)
+    # "স্থির তড়িতের প্রথম ঝলক" — a bright chime and a held glow to the end
+    for i, m in enumerate([74, 81, 86, 90]):
+        b.add(mallet(m, 2.4, tau=1.1), M["glimpse"] + i * 4, -7, -0.3 + i * 0.2)
+    b.add(pad([38, 50, 57, 62, 66, 69], T(fr - M["glimpse"]), att=0.3, rel=0.6, bright=0.6, seed=10), M["glimpse"], -4)
+    b.add(shimmer(T(fr - M["glimpse"]) - 0.2, [78, 81, 86, 90], 8, 11), M["glimpse"], -15)
     x = reverb(b.x, 0.38, 2.8, 5000)
     x *= seg_env(len(x), [(0, 1), (fr - 28, 1), (fr, 0)])[:, None]
     return x
@@ -1034,11 +1041,16 @@ def fx_act2a():
         b.add(tink(4200 + 300 * i, 0.3), c, -15)
     b.add(rustle(0.4, 90, 400, 3000, 20), M["woolDrop"], -18, -0.4)
     b.add(thud(0.3, 80, 91), M["woolDrop"] + 22, -14, -0.4)
+    # first glimpse: the amber crackles and flashes
+    b.add(zap(0.5, 92, 200), M["glimpse"], -10, 0.1)
+    b.add(sparkle(1.2, 12, 3000, 8000, 93), M["glimpse"] + 2, -14, 0.1)
     return chamber, b.x
 
 
 # ============================================================================ ACT 2B — timeline along a copper wire
-TL = [0, 186, 394, 614, 1127, 1414, 1580, 1786, 1934]
+TL = [0, 115, 364, 733, 1401, 1570, 1645, 1882, 2120]
+FRANKLIN_SKY = 1190  # "আকাশের বিদ্যুৎ আর গবেষণাগারের বিদ্যুৎ একই!" — second strike
+ELECTRON_CUE = 2467  # "ইলেকট্রন!"
 TL_CHORDS = [
     (38, [50, 53, 57, 62]),
     (46, [50, 53, 58, 62]),
@@ -1080,6 +1092,8 @@ def music_act2b():
             k += 1
     b.add(shimmer(T(TL[-1] - TL[5]), [74, 79, 81, 86], 4, 21), TL[5], -18)
     b.add(shimmer(3.5, [74, 78, 81, 86, 90], 10, 22), TL[-1], -11)
+    for i, m in enumerate([74, 78, 81, 86, 90]):
+        b.add(mallet(m, 2.2, tau=1.0), ELECTRON_CUE + i * 3, -7, -0.4 + i * 0.2)
     x = reverb(b.x, 0.3, 2.2)
     x *= seg_env(len(x), [(0, 1), (fr - 28, 1), (fr, 0)])[:, None]
     return x
@@ -1112,6 +1126,10 @@ def fx_act2b():
     b.add(wobble(2.0, 110), TL[6], -16)
     b.add(wave_sweep(1.8), TL[7], -15)
     b.add(hv_buzz(1.6), TL[8], -12, 0.1)
+    b.add(zap(0.4, 336, 180), FRANKLIN_SKY, -9)
+    b.add(decode("franklin_1752/sfx_thunder_distant.mp3"), FRANKLIN_SKY + 6, -12)
+    b.add(zap(0.45, 337, 220), ELECTRON_CUE, -9, 0.1)
+    b.add(sparkle(1.0, 12, 3500, 9000, 338), ELECTRON_CUE + 2, -13, 0.1)
     return bed, b.x
 
 
@@ -1335,19 +1353,22 @@ def fx_act3e():
 
 
 # ============================================================================ ACT 4 — paradoxes → teaser
-A4 = dict(recap=[40, 150, 205], crackle=[150, 166, 188], khotka=412, p1=575, bill=859, p2=1072, p3=1257, push=1396, calm=1567, answer=1620, teaser=1858, title=1964)
+A4 = dict(charges=103, recap=[259, 335, 407], crackle=[259, 275, 297], wait=493, khotka=651, think=830, p1=899, bill=1270,
+          p2=1430, p3=1651, push=1790, jot=1939, ok=2051, scientist=2103, answer=2331, clear=2559, teaser=2717, title=2814, signoff=2943)
+A4_CHIPS = [A4["answer"] + 10, A4["answer"] + 45, A4["answer"] + 80]
 
 
 def music_act4():
     fr = DUR["act4"]
     b = Bus(fr)
-    b.add(pad([50, 54, 57, 62, 66], T(A4["khotka"]) + 0.2, att=1.0, rel=0.8, bright=0.45, seed=60), 0, -5)
-    for s, m in [(0.6, 74), (1.3, 78), (2.0, 81), (2.7, 79), (3.6, 78), (4.3, 74)]:
+    # "দারুণ, তাই না?" warm recap — stops dead on "কিন্তু দাঁড়ান..."
+    b.add(pad([50, 54, 57, 62, 66], T(A4["wait"]) + 0.1, att=0.8, rel=0.25, bright=0.45, seed=60), 0, -5)
+    for s, m in [(0.2, 74), (0.9, 78), (1.8, 81), (4.3, 79), (5.6, 78), (6.8, 74)]:
         b.at(s, mallet(m, 1.6, tau=0.7), -11, 0.3)
-    # khotka: puzzled pizzicato, D minor with a raised-4 question
-    b.add(pad([38, 50, 53, 58], T(A4["calm"] - A4["khotka"]), att=0.8, rel=1.0, bright=0.25, seed=61), A4["khotka"], -8)
+    # khotka → paradoxes: puzzled pizzicato in D minor with a raised-4 question
+    b.add(pad([38, 50, 53, 58], T(A4["jot"] - A4["khotka"]), att=0.8, rel=1.0, bright=0.25, seed=61), A4["khotka"], -8)
     q = [(0.0, 62), (0.25, 65), (0.5, 68), (1.0, 67)]
-    for start in (A4["khotka"], A4["khotka"] + 150):
+    for start in (A4["khotka"], A4["think"]):
         for s, m in q:
             b.add(pizz(m, 0.4, seed=int(s * 10)), start + s * FPS, -8, 0.2)
     for f, (m1, m2) in [(A4["bill"], (73, 74)), (A4["p2"], (75, 76)), (A4["p3"], (70, 71))]:
@@ -1356,17 +1377,22 @@ def music_act4():
         b.add(pizz(38, 0.6), f, -9)
     t = T(A4["push"])
     k = 0
-    while t < T(A4["calm"]) - 0.1:
+    while t < T(A4["jot"]) - 0.1:
         b.at(t, pizz([38, 38, 39, 38][k % 4], 0.5, seed=k + 80), -8 + k * 0.3, -0.2)
         t += 0.5
         k += 1
-    # calm → resolve in D major
-    b.add(pad([38, 50, 54, 57, 62, 66], T(A4["teaser"] - A4["calm"]) + 0.4, att=0.7, rel=1.0, bright=0.5, seed=62), A4["calm"], -4)
-    for i, m in enumerate([69, 74, 76, 78, 76, 74, 81, 78]):
-        b.at(T(A4["calm"]) + 0.5 + i * 0.45, mallet(m, 1.6, tau=0.8), -10, 0.2 * math.sin(i))
-    for i, f in enumerate((1630, 1642, 1654)):
-        b.add(mallet([86, 90, 93][i], 1.4, tau=0.6), f, -13, [-0.4, -0.1, 0.4][i])
-    # teaser shimmer + final sting
+    # "মাথায় জট পাকিয়ে গেল তো?" — a tangled, wobbling cluster
+    b.add(tremolo_cluster([62, 63, 68], T(A4["ok"] - A4["jot"]), 7, 1.2), A4["jot"], -12)
+    # "ঠিক আছে!" → resolve in D major and climb to "বিজ্ঞানীর মতো"
+    b.add(pad([38, 50, 54, 57, 62, 66], T(A4["teaser"] - A4["ok"]) + 0.4, att=0.5, rel=1.0, bright=0.5, seed=62), A4["ok"], -4)
+    for i, m in enumerate([69, 74, 76, 78, 81, 78, 81, 86]):
+        b.at(T(A4["ok"]) + 0.6 + i * 0.42, mallet(m, 1.6, tau=0.8), -10, 0.2 * math.sin(i))
+    # one rising note per episode stamp ("একে একে")
+    for i, f in enumerate(A4_CHIPS):
+        b.add(mallet([86, 90, 93][i], 1.4, tau=0.6), f, -12, [-0.4, -0.1, 0.4][i])
+    # "জলের মতো পরিষ্কার" — clear, bright shimmer
+    b.add(shimmer(T(A4["teaser"] - A4["clear"]), [81, 86, 90, 93], 10, 67), A4["clear"], -14)
+    # teaser shimmer + final sting + sign-off
     b.add(pad([47, 59, 62, 66, 71], T(A4["title"] - A4["teaser"]) + 0.2, att=0.5, rel=0.5, bright=0.5, seed=63), A4["teaser"], -5)
     b.add(shimmer(T(fr - A4["teaser"]), [74, 78, 81, 86, 90], 6, 64), A4["teaser"], -15)
     b.add(riser(0.9, 400, 7000, 65), A4["title"] - 54, -14)
@@ -1374,6 +1400,8 @@ def music_act4():
     for i, m in enumerate([62, 66, 69, 74, 76, 81]):
         b.add(mallet(m, 2.4, tau=1.1), A4["title"] + i * 3, -6, -0.5 + i * 0.2)
     b.add(pad([38, 50, 57, 62, 64, 66, 69], T(fr - A4["title"]), att=0.15, rel=0.3, bright=0.6, seed=66), A4["title"], -3)
+    for i, m in enumerate([74, 78, 81, 86]):
+        b.add(mallet(m, 2.6, tau=1.3), A4["signoff"] + i * 9, -9, -0.3 + i * 0.2)
     x = reverb(b.x, 0.35, 2.6)
     x *= seg_env(len(x), [(0, 1), (fr - 48, 1), (fr, 0)])[:, None]
     return x
@@ -1385,10 +1413,12 @@ def fx_act4():
     bed = bedroom_bed(fr, 0, 600, 0.15) * seg_env(n, [(0, 1), (A4["teaser"] - 30, 1), (A4["teaser"] + 6, 0), (fr, 0)])[:, None]
     bed += set_rms(atom_drone(n, 601), -50) * seg_env(n, [(0, 0), (A4["teaser"] - 10, 0), (A4["teaser"] + 40, 1), (fr - 40, 1), (fr, 0)])[:, None]
     b = Bus(fr)
-    b.add(sparkle(1.0, 10, 2500, 7000, 610), A4["recap"][0], -16, -0.1)
+    # recap: charges glint, static crackles, current rushes, the field hums outward
+    b.add(sparkle(1.0, 10, 2500, 7000, 610), A4["charges"], -16, -0.1)
     for i, f in enumerate(A4["crackle"]):
         b.add(zap(0.2, 611 + i, 120), f, -12 - i, -0.15)
-    b.add(current_rush(0.9, 614), A4["recap"][2] - 4, -15, 0.5)
+    b.add(current_rush(0.9, 614), A4["recap"][1] - 4, -15, 0.5)
+    b.add(wobble(1.4, 140), A4["recap"][2], -17, -0.15)
     b.add(pop(400, 950), A4["khotka"], -13, -0.3)
     b.add(pop(500, 1200), A4["khotka"] + 7, -16, -0.3)
     b.add(whoosh(0.9, 500, 1600, 0.5, 615, pan_sweep=(0.6, 0.2)), A4["p1"], -19)
@@ -1402,10 +1432,16 @@ def fx_act4():
     b.add(scratch(T(14)), A4["p3"] + 50, -14, 0.5)
     for k in range(5):
         b.add(knock(620 + k), A4["push"] + 8.7 + k * 34.9, -9 - k * 3, 0.45)
-    for i, f in enumerate((1630, 1642, 1654)):
+    # the knot in his head, then the idea
+    b.add(pop(380, 900), A4["jot"], -14, -0.3)
+    b.add(wobble(1.6, 90), A4["jot"] + 10, -16, -0.3)
+    b.add(swish(0.5, 600, 1500, 643), A4["ok"], -17, -0.3)
+    b.add(tink(3800, 0.5), A4["ok"] + 40, -12, -0.3)
+    b.add(sparkle(1.0, 12, 3000, 8000, 644), A4["ok"] + 40, -15, -0.3)
+    for i, f in enumerate(A4_CHIPS):
         b.add(stamp(630 + i), f, -12, [-0.4, -0.2, 0.45][i])
     b.add(whoosh(T(36), 1800, 300, 0.4, 640), A4["teaser"] - 30, -13)
-    b.add(click(2600, 0.02, 641), 1900, -21)
+    b.add(click(2600, 0.02, 641), A4["teaser"] + 42, -21)
     b.add(sparkle(1.4, 14, 3000, 9000, 642), A4["title"], -16)
     return bed, b.x
 

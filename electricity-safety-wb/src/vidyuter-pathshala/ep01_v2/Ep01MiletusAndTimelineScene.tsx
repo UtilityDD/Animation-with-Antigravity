@@ -4,7 +4,7 @@ import { DepthLayer, KineticWord, MultiplaneCameraRig, type MultiplaneCamKey } f
 import { GlobeDiveShot } from '../historical/scene1/GlobeDiveShot';
 import { ThalesRig, getThalesExpressionParams, thalesAmberScreen, type ThalesPose } from '../historical/ThalesRig';
 import { DustPuff, LampFlame, ScreenFlash, ShockRing, SparkBurst, StaticArcs, flameFlicker, pulseAt } from './Ep01Fx';
-import { jaggedArc } from './Ep01BedroomSet';
+import { WorldTag, jaggedArc } from './Ep01BedroomSet';
 import { VidyuterKineticTitle } from '../historical/VidyuterBanglaKinetic';
 import {
   FaradayInductionSVG,
@@ -22,23 +22,32 @@ import {
  * the feathers quiver and snap up — CUT back wide: the last feathers leap, Thales recoils, the wool
  * falls, feathers dangle from the amber in his outstretched hand.
  *
- * VO (act2a_miletus.mp3): "গ্রিসের মিলেটাস শহরে" 4.67s · "থেলিস … অ্যাম্বার ঘষতেই দেখলেন" 8.68–12.31s
- * "কোনো স্পর্শ ছাড়াই … পালক … আটকে যাচ্ছে!" 12.76–16.98s
+ * VO (act2a_miletus.mp3, local frames @60fps):
+ *  0–197 "এই প্রশ্নের শুরু … আড়াই হাজার বছর আগে..." · 234–285 "প্রাচীন গ্রিসে।" · 322–367 "মানুষ দেখল,"
+ *  392–580 "অ্যাম্বার নামে … পশমে ঘষলে..." · 615–773 "না ছুঁয়েই ছোট্ট পালক নিজের দিকে টেনে নিচ্ছে!"
+ *  812–1208 "খ্রিস্টপূর্ব প্রায় ছশো অব্দে দার্শনিক থেলিস অব মিলেটাসের নামের সাথে … জড়িয়ে আছে।"
+ *  1242–1338 "তখন কেউ জানত না এর কারণ কী..." · 1367–1522 "এটা ছিল কেবল স্থির তড়িতের প্রথম ঝলক।"
  * Keep MILETUS_CUES in sync with scripts/synthesize_ep01v2_sound.py.
  */
 export const MILETUS_CUES = {
-  reveal: 250,
-  rubFast: 520,
-  rubStop: 690,
-  reachEnd: 785,
-  quiver: 766,
-  macroIn: 790,
-  macroOut: 905,
+  reveal: 270,
+  rubFast: 420,
+  rubStop: 590,
+  reachEnd: 662,
+  quiver: 640,
+  macroIn: 664,
+  macroOut: 775,
   /** feather i snaps off the table (0,1 inside the macro; 2,3 in the wide shot) */
-  launch: [846, 874, 914, 932],
+  launch: [712, 740, 786, 804],
   fly: 20,
-  woolDrop: 922,
-  settle: 1080,
+  woolDrop: 795,
+  /** Thales is named: the title card lands */
+  thales: 812,
+  settle: 950,
+  /** "তখন কেউ জানত না এর কারণ কী..." — he studies the amber */
+  ponder: 1242,
+  /** "… স্থির তড়িতের প্রথম ঝলক।" — the amber flashes */
+  glimpse: 1400,
 };
 
 const THALES = { worldX: 380, worldY: 21, scale: 0.9 };
@@ -86,20 +95,23 @@ function thalesPoseAt(frame: number, local: number): ThalesPose {
   const amaze = ci(local, [C.macroOut, C.macroOut + 34], [0, 1], EASE_OUT);
   const rubbing = local < C.rubStop;
   const rubIntensity = ci(local, [C.rubFast, C.rubFast + 120], [0, 1]);
-  const base = getThalesExpressionParams(amaze > 0.05 ? 'astonished' : local > C.rubStop - 60 ? 'curious' : 'focused');
+  const pondering = local >= C.ponder;
+  const base = getThalesExpressionParams(pondering ? 'contemplative' : amaze > 0.05 ? 'astonished' : local > C.rubStop - 60 ? 'curious' : 'focused');
   const tension = ci(local, [C.quiver, C.macroOut], [0, 1]);
-  const k = amaze > 0.05 ? amaze : 1;
+  const k = !pondering && amaze > 0.05 ? amaze : 1;
+  // the recoil relaxes as he starts to study the amber
+  const recoil = amaze * (1 - ci(local, [C.ponder, C.ponder + 60], [0, 0.75], EASE_INOUT));
   return {
     worldX: THALES.worldX,
     worldY: THALES.worldY,
     // leans into the rubbing, then out over the feathers, then recoils in astonishment
     chestLeanDeg:
-      (rubbing ? 2 + rubIntensity * 2 + Math.sin(local * 0.37) * rubIntensity : 0) + ci(local, [C.rubStop, C.reachEnd], [0, 5]) - amaze * 11,
+      (rubbing ? 2 + rubIntensity * 2 + Math.sin(local * 0.37) * rubIntensity : 0) + ci(local, [C.rubStop, C.reachEnd], [0, 5]) - recoil * 11,
     torsoYaw: 0,
     breathY: Math.sin(frame * 0.05) * 2 * (1 - tension * 0.7) + Math.sin(frame * 0.21) * 1.5 * amaze,
-    shoulderElevateY: -8 * amaze,
-    neckPitchDeg: 6 - amaze * 8,
-    headRollDeg: (rubbing ? 4 : 7) - amaze * 9 + Math.sin(frame * 0.04) * 1.2,
+    shoulderElevateY: -8 * recoil,
+    neckPitchDeg: 6 - recoil * 8,
+    headRollDeg: (rubbing ? 4 : 7) - recoil * 9 + (pondering ? 5 : 0) + Math.sin(frame * 0.04) * 1.2,
     headPitch: 0,
     eyeLookX: rubbing ? 0.45 : amaze > 0.3 ? 0.85 : 0.95,
     eyeLookY: rubbing ? 0.6 : amaze > 0.3 ? 0.35 : 0.85,
@@ -114,7 +126,7 @@ function thalesPoseAt(frame: number, local: number): ThalesPose {
     handTremble: Math.sin(frame * 1.3) * (1.6 * tension * (1 - amaze) + 0.8 * amaze),
     leftArmState: local >= C.woolDrop ? 'raisedWonder' : 'holdingWool',
     rightArmState: 'reachingAmber',
-    amberGlow: 0.2 + ci(local, [C.rubFast, C.rubStop, C.reachEnd], [0, 0.45, 0.9]),
+    amberGlow: 0.2 + ci(local, [C.rubFast, C.rubStop, C.reachEnd], [0, 0.45, 0.9]) + pulseAt(local, [C.glimpse], 14, 0.9),
     beardSwayDeg: Math.sin(frame * 0.07) * 2 - amaze * 3,
     amazeBlend: amaze,
   };
@@ -269,9 +281,9 @@ export const Ep01MiletusScene: React.FC<{ frame: number; local: number; duration
   const fadeIn = ci(local, [0, 20], [0, 1], EASE_OUT);
   const fadeOut = ci(local, [duration - 28, duration], [1, 0], EASE_INOUT);
 
-  const showGlobe = local < 300;
-  const globeAlpha = ci(local, [0, 18, 255, 298], [0, 1, 1, 0], EASE_INOUT);
-  const roomReveal = ci(local, [250, 300], [0, 1], EASE_OUT);
+  const showGlobe = local < C.reveal + 50;
+  const globeAlpha = ci(local, [0, 18, C.reveal + 5, C.reveal + 48], [0, 1, 1, 0], EASE_INOUT);
+  const roomReveal = ci(local, [C.reveal, C.reveal + 50], [0, 1], EASE_OUT);
   const inMacro = local >= C.macroIn && local < C.macroOut;
 
   const pose = thalesPoseAt(frame, local);
@@ -282,13 +294,15 @@ export const Ep01MiletusScene: React.FC<{ frame: number; local: number; duration
   const woolT = ci(local, [C.woolDrop, C.woolDrop + 22], [0, 1], EASE_IN);
 
   const keys: MultiplaneCamKey[] = [
-    centreOnM(250, 860, 520, 1.0, { rotateY: 1.5 }),
+    centreOnM(C.reveal, 860, 520, 1.0, { rotateY: 1.5 }),
     centreOnM(C.rubFast, 800, 470, 1.18, { rotateY: 0.4 }),
     centreOnM(C.rubStop, 820, 480, 1.32, { rotateY: 0, stop: true }),
     // low, slow push along the table as the arm stretches over the feathers
     centreOnM(C.macroIn, 930, 620, 1.55, { rotateY: -1.2 }),
     centreOnM(C.macroOut, 880, 540, 1.16, { rotateY: 0.6, stop: true }),
     centreOnM(C.settle, 860, 480, 1.3, { rotateY: 0 }),
+    // close on the amber for the 'first glimpse'
+    centreOnM(C.glimpse, 930, 460, 1.5, { rotateY: -0.4, stop: true }),
     centreOnM(duration, 860, 450, 1.42, { rotateY: -0.6 }),
   ];
 
@@ -390,6 +404,10 @@ export const Ep01MiletusScene: React.FC<{ frame: number; local: number; duration
               )}
               <DustPuff local={local} at={C.woolDrop + 22} x={330} y={TABLE_Y} width={130} color="#78716C" />
 
+              <ShockRing local={local} at={C.glimpse} x={amber.x} y={amber.y} r={150} color="#93C5FD" life={40} />
+              <SparkBurst local={local} at={C.glimpse} x={amber.x} y={amber.y} count={20} speed={11} color="#93C5FD" core="#F0F9FF" seed={31} gravity={0.05} />
+              <StaticArcs frame={frame} x={amber.x} y={amber.y} radius={34} amount={pulseAt(local, [C.glimpse], 30, 1)} count={6} seed={13} />
+              <WorldTag local={local} at={C.glimpse + 6} until={duration + 10} text="স্থির তড়িৎ" x={amber.x + 20} y={amber.y - 30} color="#93C5FD" dx={110} dy={-110} size={30} />
               {wideContacts.map((c, i) => (
                 <g key={c}>
                   <ShockRing local={local} at={c} x={amber.x} y={amber.y + 20} r={110} />
@@ -409,7 +427,7 @@ export const Ep01MiletusScene: React.FC<{ frame: number; local: number; duration
             <DustMotes frame={frame} cx={1300} cy={560} radius={580} count={26} opacity={0.8} seed={21} />
           </DepthLayer>
         </MultiplaneCameraRig>
-        <ScreenFlash amount={pulseAt(local, wideContacts, 6, 0.4)} color="253, 230, 138" at={[50, 50]} />
+        <ScreenFlash amount={pulseAt(local, wideContacts, 6, 0.4) + pulseAt(local, [C.glimpse], 10, 0.45)} color="253, 230, 138" at={[50, 50]} />
       </div>
 
       {inMacro && <AmberMacroShot frame={frame} local={local} />}
@@ -420,8 +438,8 @@ export const Ep01MiletusScene: React.FC<{ frame: number; local: number; duration
         </div>
       )}
 
-      <VidyuterKineticTitle frame={local} startFrame={270} endFrame={740} lines={[{ text: 'মিলেটাস • খ্রি.পূ. ~600', highlight: '~600', sizePx: 64 }]} x={90} y={100} accentColor="#F59E0B" variant="slide" />
-      <KineticWord localMs={localMs} appearMs={10300} emphasizeStartMs={10500} emphasizeEndMs={12300} removeMs={12700} text="অ্যাম্বার" x={1180} y={380} accentColor="#F59E0B" />
+      <VidyuterKineticTitle frame={local} startFrame={C.thales} endFrame={C.ponder - 10} lines={[{ text: 'মিলেটাস • খ্রি.পূ. ~600', highlight: '~600', sizePx: 64 }]} x={90} y={100} accentColor="#F59E0B" variant="slide" />
+      <KineticWord localMs={localMs} appearMs={6600} emphasizeStartMs={6800} emphasizeEndMs={9400} removeMs={9900} text="অ্যাম্বার" x={1180} y={380} accentColor="#F59E0B" />
     </div>
   );
 };
@@ -429,20 +447,24 @@ export const Ep01MiletusScene: React.FC<{ frame: number; local: number; duration
 const TIMELINE_ITEMS = [
   { x: 320, label: 'খ্রি.পূ. ~600 · থেলিস', color: '#F59E0B' },
   { x: 860, label: '1600 · গিলবার্ট', color: '#A855F7' },
-  { x: 1320, label: '1745 · লেইডেন জার', color: '#38BDF8' },
+  { x: 1320, label: '1745–46 · লেইডেন জার', color: '#38BDF8' },
   { x: 1780, label: '1752 · ফ্র্যাঙ্কলিন', color: '#FBBF24' },
   { x: 2240, label: '1800 · ভোল্টা', color: '#D9822B' },
   { x: 2700, label: '1820 · ওরস্টেড-অ্যাম্পিয়ার', color: '#10B981' },
   { x: 3160, label: '1831 · ফ্যারাডে', color: '#38BDF8' },
-  { x: 3620, label: '1860 · ম্যাক্সওয়েল', color: '#A855F7' },
+  { x: 3620, label: '1860-এর দশক · ম্যাক্সওয়েল', color: '#A855F7' },
   { x: 4080, label: '1897 · জে. জে. থমসন', color: '#38BDF8' },
 ];
 
 /**
  * When each milestone is NAMED in act2b_timeline.mp3 (local frames @60fps).
- * Measured from the 9 VO phrases between pauses (ffmpeg silencedetect) — one phrase per milestone.
+ * Measured from VO pauses (ffmpeg silencedetect). 1831 (index 6) shares the sentence "আঠারোশো বিশ থেকে আঠারোশো একত্রিশে…" with 1820, so its cue is estimated within that phrase.
  */
-const TIMELINE_CUES = [0, 186, 394, 614, 1127, 1414, 1580, 1786, 1934];
+const TIMELINE_CUES = [0, 115, 364, 733, 1401, 1570, 1645, 1882, 2120];
+/** "আকাশের বিদ্যুৎ আর গবেষণাগারের বিদ্যুৎ একই!" — second strike down Franklin's kite string */
+const FRANKLIN_SKY = 1190;
+/** final word "ইলেকট্রন!" — the cathode tube fires */
+const ELECTRON_CUE = 2467;
 const TIMELINE_YEARS = [-600, 1600, 1745, 1752, 1800, 1820, 1831, 1860, 1897];
 
 /** width/height of each Scene2Apparatus nested <svg> (viewBox is centred on 0,0) */
@@ -617,8 +639,8 @@ export const Ep01BrokenTimelineScene: React.FC<{ frame: number; local: number; d
               />
             )}
             {/* Franklin: lightning strikes the kite */}
-            {pulseAt(local, [TIMELINE_CUES[3] + 4, TIMELINE_CUES[3] + 13], 3) > 0.05 && (
-              <g opacity={pulseAt(local, [TIMELINE_CUES[3] + 4, TIMELINE_CUES[3] + 13], 3)}>
+            {pulseAt(local, [TIMELINE_CUES[3] + 4, TIMELINE_CUES[3] + 13, FRANKLIN_SKY, FRANKLIN_SKY + 9], 3) > 0.05 && (
+              <g opacity={pulseAt(local, [TIMELINE_CUES[3] + 4, TIMELINE_CUES[3] + 13, FRANKLIN_SKY, FRANKLIN_SKY + 9], 3)}>
                 <path d={jaggedArc(TIMELINE_ITEMS[3].x + 160, -40, TIMELINE_ITEMS[3].x + 20, 330, local < TIMELINE_CUES[3] + 13 ? 71 : 93, 9)} fill="none" stroke="#FEF9C3" strokeWidth="6" filter="drop-shadow(0 0 16px #FDE047)" />
                 <path d={jaggedArc(TIMELINE_ITEMS[3].x + 160, -40, TIMELINE_ITEMS[3].x + 20, 330, local < TIMELINE_CUES[3] + 13 ? 71 : 93, 9)} fill="none" stroke="#FFFFFF" strokeWidth="2" />
               </g>
@@ -626,6 +648,9 @@ export const Ep01BrokenTimelineScene: React.FC<{ frame: number; local: number; d
             {/* Thomson: the cathode tube zaps */}
             <StaticArcs frame={frame} x={TIMELINE_ITEMS[8].x} y={390} radius={60} amount={ci(local, [TIMELINE_CUES[8], TIMELINE_CUES[8] + 10, TIMELINE_CUES[8] + 90, TIMELINE_CUES[8] + 140], [0, 1, 1, 0.3])} color="#38BDF8" count={5} seed={11} />
             <SparkBurst local={local} at={TIMELINE_CUES[8] + 4} x={TIMELINE_ITEMS[8].x + 60} y={390} count={18} speed={12} gravity={0.05} dir={0} spread={70} color="#7DD3FC" seed={61} />
+            <SparkBurst local={local} at={ELECTRON_CUE} x={TIMELINE_ITEMS[8].x + 60} y={390} count={26} speed={14} gravity={0.02} dir={0} spread={120} color="#7DD3FC" core="#F0F9FF" seed={67} size={1.3} />
+            <ShockRing local={local} at={ELECTRON_CUE} x={TIMELINE_ITEMS[8].x + 60} y={390} r={140} color="#38BDF8" />
+            <StaticArcs frame={frame} x={TIMELINE_ITEMS[8].x + 60} y={390} radius={40} amount={pulseAt(local, [ELECTRON_CUE], 24, 1)} color="#7DD3FC" count={6} seed={17} />
 
             {TIMELINE_ITEMS.map((item, idx) => {
               const isActive = idx === active;
@@ -673,8 +698,8 @@ export const Ep01BrokenTimelineScene: React.FC<{ frame: number; local: number; d
         </DepthLayer>
       </MultiplaneCameraRig>
       {/* lightning lights up the whole lens for the Franklin beat */}
-      <ScreenFlash amount={pulseAt(local, [TIMELINE_CUES[3] + 4, TIMELINE_CUES[3] + 13], 4, 0.7)} color="254, 249, 195" at={[55, 25]} />
-      <ScreenFlash amount={pulseAt(local, [TIMELINE_CUES[2] + 6, TIMELINE_CUES[8] + 4], 4, 0.3)} color="125, 211, 252" at={[50, 38]} />
+      <ScreenFlash amount={pulseAt(local, [TIMELINE_CUES[3] + 4, TIMELINE_CUES[3] + 13, FRANKLIN_SKY, FRANKLIN_SKY + 9], 4, 0.7)} color="254, 249, 195" at={[55, 25]} />
+      <ScreenFlash amount={pulseAt(local, [TIMELINE_CUES[2] + 6, TIMELINE_CUES[8] + 4], 4, 0.3) + pulseAt(local, [ELECTRON_CUE], 8, 0.45)} color="125, 211, 252" at={[50, 38]} />
     </div>
   );
 };

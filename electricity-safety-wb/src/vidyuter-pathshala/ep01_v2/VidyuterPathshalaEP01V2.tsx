@@ -10,12 +10,12 @@ import { Ep01ConfusionOutroScene } from './Ep01ConfusionOutroScene';
 
 export const EP01_V2_DURATIONS = {
   intro: 180,          // 3.00s
-  act1: 1218,          // 20.00s (1200f) + 18f
-  act2a: 1372,         // 22.56s (1354f) + 18f
-  act2b: 2192,         // 36.24s (2174f) + 18f
+  act1: 1300,          // 21.36s (1282f) + 18f
+  act2a: 1540,         // 25.36s (1522f) + 18f
+  act2b: 2528,         // 41.84s (2510f) + 18f
   act3: 1664,          // 27.44s (1646f) + 18f
   act3e: 1837,         // 30.32s (1819f) + 18f
-  act4: 2106,          // 34.80s (2088f) + 18f
+  act4: 3061,          // 50.72s (3043f) + 18f
 };
 
 export const EP01_V2_TOTAL_FRAMES =
@@ -25,7 +25,7 @@ export const EP01_V2_TOTAL_FRAMES =
   EP01_V2_DURATIONS.act2b +
   EP01_V2_DURATIONS.act3 +
   EP01_V2_DURATIONS.act3e +
-  EP01_V2_DURATIONS.act4; // 10,569 frames (~176.15s @ 60fps)
+  EP01_V2_DURATIONS.act4; // 12,110 frames (~201.8s @ 60fps)
 
 /**
  * One beat's sound: narration + score + ambience/foley. Score and fx stems are rendered to the exact

@@ -18,14 +18,19 @@ import { EASE_POP } from './Ep01SharedGraphics';
 
 /**
  * Act 1 cue sheet (local frames @60fps), measured from pauses in act1_hook.mp3 (ffmpeg silencedetect):
- *  "চটপট!" 5.57s · "ছোট্ট নীলচে স্ফুলিঙ্গ!" 6.52–7.91s · VO gap 7.91–8.50s (whip-pan)
- *  "আবার পাশের সুইচটা টিপতেই—" 8.50–10.23s · "বাল্বটা জ্বলে উঠল!" 10.49–12.36s
+ *  "শীতের রাত। ঘরের আলো নেভানো।" 0–2.72s · "গা থেকে … কম্বলটা সরাতেই..." 3.27–5.47s
+ *  "চটপট!" 6.07s · "ছোট্ট নীলচে স্ফুলিঙ্গ!" 7.01–8.46s · VO gap 8.46–9.14s (whip-pan)
+ *  "আবার পাশের সুইচটা টিপতেই..." 9.14–10.79s · "মাথার ওপরের বাল্বটা জ্বলে উঠল!" 11.24–13.04s
+ *  "দুটো কি একই জিনিস?" 13.57s · "কম্বলের ওই ছোট্ট চমক, আর … শক্তি..." 15.25–19.58s · "আসলে বিদ্যুৎ কী?" 20.23s
+ * Keep in sync with scripts/synthesize_ep01v2_sound.py (A1).
  */
 export const ACT1_CUES = {
-  snap: 334,
-  sparkBursts: [334, 351, 372, 398, 426],
-  whip: 470,
-  switchPress: 590,
+  snap: 364,
+  sparkBursts: [364, 381, 402, 428, 456],
+  whip: 512,
+  switchPress: 640,
+  thought: 814,
+  hook: 1205,
 };
 
 /** Sum of exponentially decaying crackle bursts, 0..1 */
@@ -39,7 +44,7 @@ export function crackleIntensity(local: number, bursts: number[]) {
 }
 
 /**
- * ACT 1: Everyday Sensory Hook (0..1218f / 20.0s)
+ * ACT 1: Everyday Sensory Hook (0..1300f / 21.36s VO)
  * Lived-in Indian winter bedroom across Z0–Z4. No slide headings: the only on-screen words are a
  * comic sound word on the spark and the closing hook question.
  */
@@ -53,25 +58,25 @@ export const Ep01WinterHookScene: React.FC<{ frame: number; local: number; durat
   const fadeIn = ci(local, [0, 20], [0, 1], EASE_OUT);
   const fadeOut = ci(local, [duration - 28, duration], [1, 0], EASE_INOUT);
 
-  const armLift = ci(local, [195, 322], [0, 1], EASE_OUT);
+  const armLift = ci(local, [215, 352], [0, 1], EASE_OUT);
   const blanketLift = armLift * 105;
   const crackle = crackleIntensity(local, C.sparkBursts);
   const arcSeed = Math.floor(local / 2);
-  const fiberMacroAlpha = ci(local, [350, 380, 468, 494], [0, 1, 1, 0], EASE_OUT);
+  const fiberMacroAlpha = ci(local, [380, 410, 498, 524], [0, 1, 1, 0], EASE_OUT);
 
   const switchClosed = local >= C.switchPress;
   const conduitFront = ci(local, [C.switchPress, C.switchPress + 36], [0, 1], EASE_OUT);
   // filament catches with a couple of stutters before it settles (matches the ignite SFX)
   const bulbGlow = ci(local, [C.switchPress + 36, C.switchPress + 70], [0, 1], EASE_OUT) * ignitionFlicker(local, C.switchPress + 36, 18, 4);
   const isSurprised = local >= C.snap + 6;
-  const eyeX = local >= 740 ? ci(local, [740, 830, 970], [-0.4, 0.75, -0.2]) : 0.35;
-  const eyeY = local >= 740 ? ci(local, [740, 830, 970], [0.2, -0.75, 0.1]) : 0.45;
-  const thoughtAlpha = ci(local, [771, 805, 1170, 1210], [0, 1, 1, 0], EASE_OUT);
-  const lightFlood = bulbGlow * ci(local, [C.switchPress + 36, 760, 1000], [0, 1, 0.75]);
+  const eyeX = local >= 780 ? ci(local, [780, 870, 1030], [-0.4, 0.75, -0.2]) : 0.35;
+  const eyeY = local >= 780 ? ci(local, [780, 870, 1030], [0.2, -0.75, 0.1]) : 0.45;
+  const thoughtAlpha = ci(local, [C.thought, C.thought + 34, C.hook - 25, C.hook + 10], [0, 1, 1, 0], EASE_OUT);
+  const lightFlood = bulbGlow * ci(local, [C.switchPress + 36, 800, 1060], [0, 1, 0.75]);
   // blue static flash that lights the dark room on each crackle
   const staticFlash = pulseAt(local, [C.sparkBursts[0]], 7, 0.55) + pulseAt(local, C.sparkBursts.slice(1), 5, 0.22);
   const sparkY = BED.y - 6 - blanketLift * 0.2;
-  const thoughtPop = ci(local, [771, 783, 795], [0.4, 1.12, 1], EASE_POP);
+  const thoughtPop = ci(local, [C.thought, C.thought + 12, C.thought + 24], [0.4, 1.12, 1], EASE_POP);
 
   return (
     <div
@@ -90,16 +95,16 @@ export const Ep01WinterHookScene: React.FC<{ frame: number; local: number; durat
         frame={frame}
         keys={[
           { f: 0, x: 0, y: 0, z: 0.96, rotateY: -1.4 },
-          { f: 200, x: -120, y: 20, z: 1.14, rotateY: 0 },
+          { f: 220, x: -120, y: 20, z: 1.14, rotateY: 0 },
           { f: C.snap, x: -180, y: 40, z: 1.3, rotateY: 1.2 },
           { f: C.snap + 28, x: -236, y: 45, z: 1.78, rotateY: 1.6 },
           { f: C.whip, x: -244, y: 46, z: 1.84, rotateY: 1.8, stop: true },
           { f: C.whip + 45, x: 310, y: 20, z: 1.35, rotateY: -1.8, stop: true },
           { f: C.switchPress, x: 300, y: 10, z: 1.44, rotateY: -1.4 },
           { f: C.switchPress + 50, x: 300, y: -110, z: 1.38, rotateY: -1.0 },
-          { f: 720, x: 240, y: -210, z: 1.25, rotateY: 0, stop: true },
-          { f: 790, x: -210, y: -35, z: 1.35, rotateY: 1.4 },
-          { f: 1020, x: -160, y: -25, z: 1.26, rotateY: 0.6 },
+          { f: 770, x: 240, y: -210, z: 1.25, rotateY: 0, stop: true },
+          { f: 840, x: -210, y: -35, z: 1.35, rotateY: 1.4 },
+          { f: 1080, x: -160, y: -25, z: 1.26, rotateY: 0.6 },
           { f: duration, x: -40, y: 0, z: 1.06, rotateY: 0 },
         ]}
         shakes={[
@@ -200,8 +205,8 @@ export const Ep01WinterHookScene: React.FC<{ frame: number; local: number; durat
       <ScreenFlash amount={staticFlash} color="125, 211, 252" at={[42, 56]} />
 
       {/* The one question the whole episode answers */}
-      <VidyuterKineticTitle frame={local} startFrame={1100} endFrame={1215} lines={[{ text: 'আসলে বিদ্যুৎ কী?', highlight: 'কী?', sizePx: 72 }]} align="center" x={960} y={880} accentColor="#FBBF24" variant="spring" />
-      <KineticWord localMs={localMs} appearMs={8400} emphasizeStartMs={8600} emphasizeEndMs={10800} removeMs={11400} text="6A সুইচ" x={1280} y={820} accentColor="#FBBF24" />
+      <VidyuterKineticTitle frame={local} startFrame={C.hook} endFrame={duration - 3} lines={[{ text: 'আসলে বিদ্যুৎ কী?', highlight: 'কী?', sizePx: 72 }]} align="center" x={960} y={880} accentColor="#FBBF24" variant="spring" />
+      <KineticWord localMs={localMs} appearMs={9300} emphasizeStartMs={9500} emphasizeEndMs={11800} removeMs={12400} text="6A সুইচ" x={1280} y={820} accentColor="#FBBF24" />
     </div>
   );
 };

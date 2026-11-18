@@ -1,18 +1,18 @@
 {
   "act1_hook": {
-    "duration_s": 20.0,
-    "frames_60fps": 1200,
-    "recommended_beat_frames": 1218
+    "duration_s": 21.36,
+    "frames_60fps": 1282,
+    "recommended_beat_frames": 1300
   },
   "act2a_miletus": {
-    "duration_s": 22.56,
-    "frames_60fps": 1354,
-    "recommended_beat_frames": 1372
+    "duration_s": 25.36,
+    "frames_60fps": 1522,
+    "recommended_beat_frames": 1540
   },
   "act2b_timeline": {
-    "duration_s": 36.24,
-    "frames_60fps": 2174,
-    "recommended_beat_frames": 2192
+    "duration_s": 41.84,
+    "frames_60fps": 2510,
+    "recommended_beat_frames": 2528
   },
   "act3_physics": {
     "duration_s": 27.44,
@@ -25,8 +25,8 @@
     "recommended_beat_frames": 1837
   },
   "act4_confusion": {
-    "duration_s": 34.8,
-    "frames_60fps": 2088,
-    "recommended_beat_frames": 2106
+    "duration_s": 50.72,
+    "frames_60fps": 3043,
+    "recommended_beat_frames": 3061
   }
 }

@@ -9,7 +9,7 @@ export interface BoyPose {
   eyeLookX: number;
   eyeLookY: number;
   blinkAmount: number;
-  expression: 'curious' | 'surprised';
+  expression: 'curious' | 'surprised' | 'puzzled' | 'happy';
   armLift: number; // 0..1 lifting blanket
 }
 
@@ -38,7 +38,12 @@ export const BoyRig: React.FC<{
   } = pose;
 
   const isSurprised = expression === 'surprised';
-  const browLift = isSurprised ? 7.5 : 1.5;
+  const isPuzzled = expression === 'puzzled';
+  const isHappy = expression === 'happy';
+  const browLift = isSurprised ? 7.5 : isHappy ? 4 : 1.5;
+  // puzzled: one brow up, one knitted down
+  const browL = isPuzzled ? 8 : browLift;
+  const browR = isPuzzled ? -2 : browLift;
   const eyeRy = Math.max(1.2, (1 - blinkAmount * 0.92) * (isSurprised ? 11.5 : 8.2));
 
   return (
@@ -131,11 +136,18 @@ export const BoyRig: React.FC<{
             ))}
 
             {/* Expressive Eyebrows */}
-            <path d={`M -30,${-20 - browLift} Q -19,${-26 - browLift} -8,${-20 - browLift}`} fill="none" stroke="#1C1917" strokeWidth="3.5" strokeLinecap="round" />
-            <path d={`M 8,${-20 - browLift} Q 19,${-26 - browLift} 30,${-20 - browLift}`} fill="none" stroke="#1C1917" strokeWidth="3.5" strokeLinecap="round" />
+            <path d={`M -30,${-20 - browL} Q -19,${-26 - browL} -8,${-20 - browL}`} fill="none" stroke="#1C1917" strokeWidth="3.5" strokeLinecap="round" />
+            <path d={`M 8,${-20 - browR + (isPuzzled ? 3 : 0)} Q 19,${-26 - browR} 30,${-20 - browR}`} fill="none" stroke="#1C1917" strokeWidth="3.5" strokeLinecap="round" />
             <path d="M -2,-4 L -5,12 L 4,14" fill="none" stroke="#B87D5B" strokeWidth="2.2" strokeLinecap="round" />
             {isSurprised ? (
               <ellipse cx="0" cy="31" rx="8" ry="10" fill="#7F1D1D" stroke="#8C583A" strokeWidth="1.5" />
+            ) : isHappy ? (
+              <g>
+                <path d="M -17,26 Q 0,46 17,26 Z" fill="#7F1D1D" stroke="#8C583A" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M -13,27.5 Q 0,32 13,27.5" fill="none" stroke="#F8FAFC" strokeWidth="4" strokeLinecap="round" />
+              </g>
+            ) : isPuzzled ? (
+              <path d="M -12,32 Q -6,27 0,32 Q 6,37 12,31" fill="none" stroke="#8C583A" strokeWidth="2.5" strokeLinecap="round" />
             ) : (
               <path d="M -12,31 Q 0,35 12,30" fill="none" stroke="#8C583A" strokeWidth="2.5" strokeLinecap="round" />
             )}
