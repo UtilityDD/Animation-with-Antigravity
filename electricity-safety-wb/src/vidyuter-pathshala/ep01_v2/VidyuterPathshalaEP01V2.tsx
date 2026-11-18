@@ -1,11 +1,11 @@
 import React from 'react';
-import { Audio, Loop, Sequence, staticFile, useCurrentFrame } from 'remotion';
+import { Audio, Sequence, staticFile, useCurrentFrame } from 'remotion';
 import { FontInjector } from '../../kinetic-master/FontInjector';
 import { FilmGrade } from '../historical/scene1/Scene1Shared';
 import { Ep01V2Intro } from './Ep01V2Intro';
-import { ACT1_CUES, Ep01WinterHookScene } from './Ep01WinterHookScene';
+import { Ep01WinterHookScene } from './Ep01WinterHookScene';
 import { Ep01BrokenTimelineScene, Ep01MiletusScene } from './Ep01MiletusAndTimelineScene';
-import { ACT3E_CUES, Ep01MicroPhysicsScene, Ep01SwitchBulbScene } from './Ep01MicroPhysicsScene';
+import { Ep01MicroPhysicsScene, Ep01SwitchBulbScene } from './Ep01MicroPhysicsScene';
 import { Ep01ConfusionOutroScene } from './Ep01ConfusionOutroScene';
 
 export const EP01_V2_DURATIONS = {
@@ -27,6 +27,19 @@ export const EP01_V2_TOTAL_FRAMES =
   EP01_V2_DURATIONS.act3e +
   EP01_V2_DURATIONS.act4; // 10,569 frames (~176.15s @ 60fps)
 
+/**
+ * One beat's sound: narration + score + ambience/foley. Score and fx stems are rendered to the exact
+ * beat length by scripts/synthesize_ep01v2_sound.py with levels and VO ducking baked in — keep volume 1.
+ * Re-run that script whenever a beat's duration or a cue frame changes.
+ */
+const BeatAudio: React.FC<{ vo: string; act: string }> = ({ vo, act }) => (
+  <>
+    <Audio src={staticFile(`vidyuter-pathshala/audio/ep01_v2/${vo}.mp3`)} volume={1.0} />
+    <Audio src={staticFile(`vidyuter-pathshala/audio/ep01_v2/music/music_${act}.mp3`)} volume={1.0} />
+    <Audio src={staticFile(`vidyuter-pathshala/audio/ep01_v2/fx/fx_${act}.mp3`)} volume={1.0} />
+  </>
+);
+
 export const VidyuterPathshalaEP01V2: React.FC = () => {
   const frame = useCurrentFrame();
 
@@ -44,57 +57,38 @@ export const VidyuterPathshalaEP01V2: React.FC = () => {
       {/* SVG <text> otherwise falls back to Times New Roman; tabular figures keep counters from jittering */}
       <style>{`svg text { font-family: 'Hind Siliguri', 'Noto Sans Bengali', sans-serif; font-variant-numeric: tabular-nums; }`}</style>
 
-      <Loop durationInFrames={1920}>
-        <Audio src={staticFile('vidyuter-pathshala/audio/ep01_doc/sfx/ep01_ambient_bed.mp3')} volume={0.11} />
-      </Loop>
-
       <Sequence from={f0} durationInFrames={EP01_V2_DURATIONS.intro}>
+        <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/music/intro_sting.mp3')} volume={1.0} />
         <Ep01V2Intro frame={frame} />
       </Sequence>
 
       <Sequence from={f1} durationInFrames={EP01_V2_DURATIONS.act1}>
-        <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/act1_hook.mp3')} volume={1.0} />
-        {/* SFX cued to VO: "চটপট!" @5.57s (334f), whip-pan @470f, switch press @590f */}
-        <Sequence from={ACT1_CUES.snap} durationInFrames={30}>
-          <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/sfx_blanket_snap.mp3')} volume={0.35} />
-        </Sequence>
-        <Sequence from={ACT1_CUES.snap} durationInFrames={90}>
-          <Audio src={staticFile('vidyuter-pathshala/audio/ep01_doc/sfx/sfx_spark_crackle.mp3')} volume={0.3} />
-        </Sequence>
-        <Sequence from={ACT1_CUES.whip - 6} durationInFrames={60}>
-          <Audio src={staticFile('vidyuter-pathshala/audio/ep01_doc/sfx/sfx_whoosh_dive.mp3')} volume={0.22} />
-        </Sequence>
-        <Sequence from={ACT1_CUES.switchPress} durationInFrames={24}>
-          <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/sfx_switch_click.mp3')} volume={0.38} />
-        </Sequence>
+        <BeatAudio vo="act1_hook" act="act1" />
         <Ep01WinterHookScene frame={frame} local={frame - f1} duration={EP01_V2_DURATIONS.act1} />
       </Sequence>
 
       <Sequence from={f2a} durationInFrames={EP01_V2_DURATIONS.act2a}>
-        <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/act2a_miletus.mp3')} volume={1.0} />
+        <BeatAudio vo="act2a_miletus" act="act2a" />
         <Ep01MiletusScene frame={frame} local={frame - f2a} duration={EP01_V2_DURATIONS.act2a} />
       </Sequence>
 
       <Sequence from={f2b} durationInFrames={EP01_V2_DURATIONS.act2b}>
-        <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/act2b_timeline.mp3')} volume={1.0} />
+        <BeatAudio vo="act2b_timeline" act="act2b" />
         <Ep01BrokenTimelineScene frame={frame} local={frame - f2b} duration={EP01_V2_DURATIONS.act2b} />
       </Sequence>
 
       <Sequence from={f3} durationInFrames={EP01_V2_DURATIONS.act3}>
-        <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/act3_physics.mp3')} volume={1.0} />
+        <BeatAudio vo="act3_physics" act="act3" />
         <Ep01MicroPhysicsScene frame={frame} local={frame - f3} duration={EP01_V2_DURATIONS.act3} />
       </Sequence>
 
       <Sequence from={f3e} durationInFrames={EP01_V2_DURATIONS.act3e}>
-        <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/act3e_switch_bulb.mp3')} volume={1.0} />
-        <Sequence from={ACT3E_CUES.press + 8} durationInFrames={24}>
-          <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/sfx_switch_click.mp3')} volume={0.38} />
-        </Sequence>
+        <BeatAudio vo="act3e_switch_bulb" act="act3e" />
         <Ep01SwitchBulbScene frame={frame} local={frame - f3e} duration={EP01_V2_DURATIONS.act3e} />
       </Sequence>
 
       <Sequence from={f4} durationInFrames={EP01_V2_DURATIONS.act4}>
-        <Audio src={staticFile('vidyuter-pathshala/audio/ep01_v2/act4_confusion.mp3')} volume={1.0} />
+        <BeatAudio vo="act4_confusion" act="act4" />
         <Ep01ConfusionOutroScene frame={frame} local={frame - f4} duration={EP01_V2_DURATIONS.act4} />
       </Sequence>
 

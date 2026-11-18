@@ -3,12 +3,14 @@ import { DustMotes, EASE_IN, EASE_INOUT, EASE_OUT, ci } from '../historical/scen
 import { DepthLayer, KineticWord, MultiplaneCameraRig, type MultiplaneCamKey } from '../core/MultiplaneCameraRig';
 import { BoyRig } from './BoyRig';
 import { EASE_POP, NeutralAtomCloud, seeded } from './Ep01SharedGraphics';
+import { DustPuff, ScreenFlash, ShockRing, SparkBurst, SpeedLines, StaticArcs, ignitionFlicker, pulseAt } from './Ep01Fx';
 import {
   BedWithBlanket,
   BedroomFarWall,
   BedroomForeground,
   BedroomMidground,
   BulbLightWash,
+  CONDUIT_D,
   DESK_TOP,
   DeskBackProps,
   DeskForeground,
@@ -168,9 +170,26 @@ const BedroomMoreThanWires: React.FC<{ frame: number; local: number }> = ({ fram
                 );
               })}
 
+            {/* static fizz around the raised hair */}
+            <StaticArcs frame={frame} x={headX} y={crownY - 16} radius={34} amount={hairUp * ci(local, [620, 690], [0.9, 0])} color="#FDE68A" count={3} seed={5} />
+
             <BedWithBlanket blanketLift={60} crackle={0} arcSeed={0} charges={charges} frame={frame} />
+            {/* charges appear on the blanket with a glint */}
+            {[0, 18, 36].map((d, i) => (
+              <SparkBurst key={d} local={local} at={A3.cards[0] + d} x={640 + i * 80} y={570 - (i % 2) * 14} count={8} speed={4} gravity={0} life={26} color={i % 2 ? '#7DD3FC' : '#FDA4AF'} core="#FFFFFF" seed={i + 70} />
+            ))}
 
             <WallCircuit frame={frame} closed front={0} flow={0} bulbGlow={1} xray={1} />
+            {/* the push surges along the wall wire */}
+            <path d={CONDUIT_D} fill="none" stroke="#7DD3FC" strokeWidth="22" strokeLinejoin="round" opacity={pulseAt(local, [A3.cards[2]], 24, 0.45)} filter="blur(6px)" />
+            {local >= A3.cards[2] && local < A3.cards[2] + 50 &&
+              Array.from({ length: 8 }).map((_, k) => {
+                const head = ci(local, [A3.cards[2], A3.cards[2] + 40], [0, CONDUIT_TRACK.total], EASE_IN);
+                const [cx, cy] = CONDUIT_TRACK.at(Math.min(CONDUIT_TRACK.total - 0.01, Math.max(0, head - k * 14)));
+                return <circle key={k} cx={cx} cy={cy} r={9 - k} fill="#F0F9FF" opacity={(1 - k / 8) * ci(local, [A3.cards[2] + 40, A3.cards[2] + 50], [1, 0])} filter="drop-shadow(0 0 10px #38BDF8)" />;
+              })}
+            <ShockRing local={local} at={A3.cards[2] + 40} x={1280} y={235} r={120} color="#FDE68A" />
+
             {/* free electrons drifting inside the copper core of the wall wire */}
             {Array.from({ length: 34 }).map((_, k) => {
               const s = k * (CONDUIT_TRACK.total / 34) + local * 0.9 * flowBoost;
@@ -207,6 +226,8 @@ const AtomDive: React.FC<{ frame: number; local: number }> = ({ frame, local }) 
   const atomIn = ci(local, [A3.dive + 55, A3.dive + 130], [0, 1], EASE_OUT);
   const nucleusGlow = ci(local, [A3.nucleus, A3.nucleus + 24, A3.cloud, A3.cloud + 30], [0, 1, 1, 0.3]);
   const cloudStrength = 0.35 + 0.65 * ci(local, [A3.cloud, A3.cloud + 70], [0, 1], EASE_OUT);
+  // nucleus throbs as it is named (heartbeat SFX)
+  const nucPulse = pulseAt(local, [A3.nucleus, A3.nucleus + 30, A3.nucleus + 60], 12);
 
   const keys: MultiplaneCamKey[] = [
     centreOn(A3.dive, 960, 540, 0.9, { rotateY: 0 }),
@@ -237,7 +258,9 @@ const AtomDive: React.FC<{ frame: number; local: number }> = ({ frame, local }) 
             )}
             {atomIn > 0.01 && (
               <g opacity={atomIn} transform={`translate(960, 540) scale(${(0.3 + 0.7 * atomIn).toFixed(3)}) translate(-960, -540)`}>
+                {nucPulse > 0.02 && <circle cx="960" cy="540" r={60 + 60 * nucPulse} fill="rgba(253, 164, 175, 0.35)" opacity={nucPulse} />}
                 <NeutralAtomCloud frame={frame} cx={960} cy={540} radius={330} cloudStrength={cloudStrength} nucleusGlow={nucleusGlow} dots={220} />
+                <ShockRing local={local} at={A3.nucleus} x={960} y={540} r={170} color="#FDA4AF" life={36} />
                 <WorldTag local={local} at={A3.nucleus + 4} until={A3.cloud + 20} text="প্রোটন" x={953} y={534} color="#FDA4AF" dx={-130} dy={-100} size={26} />
                 <WorldTag local={local} at={A3.nucleus + 30} until={A3.cloud + 20} text="নিউট্রন" x={968} y={534} color="#CBD5E1" dx={130} dy={-100} size={26} />
               </g>
@@ -384,6 +407,18 @@ const CombDesk: React.FC<{ frame: number; local: number }> = ({ frame, local }) 
               ))}
             </g>
 
+            {/* the comb crackles with static while it rubs */}
+            <StaticArcs frame={frame} x={combX} y={combY - 8} radius={46} amount={combIn * ci(local, [A3.rub, A3.rub + 60, 1480, 1540], [0, 0.75, 0.75, 0.25])} color="#7DD3FC" count={3} seed={9} />
+            {[0, 1, 2, 3, 4, 5].map((k) => (
+              <SparkBurst key={`hop${k}`} local={local} at={A3.transfer + k * 24 + 22} x={combX - 70 + k * 28} y={combY - 6} count={6} speed={4} gravity={0.1} life={20} color="#38BDF8" seed={k + 80} />
+            ))}
+            {SCRAPS.map((p, i) => (
+              <g key={`pop${i}`}>
+                <DustPuff local={local} at={1562 + i * 7} x={p.x} y={DESK_TOP - 2} width={50} color="#E7D7BC" life={30} />
+                <SparkBurst local={local} at={1600 + i * 7} x={combX - 64 + i * 32} y={combY + 46} count={6} speed={4} gravity={0.05} life={20} color="#FDE68A" core="#FFFBEB" seed={i + 90} />
+              </g>
+            ))}
+
             {/* electrons hop hair → comb, then ride on the comb */}
             {[0, 1, 2, 3, 4, 5].map((k) => {
               const t = hopped(k);
@@ -464,6 +499,9 @@ export const Ep01MicroPhysicsScene: React.FC<{ frame: number; local: number; dur
           <CombDesk frame={frame} local={local} />
         </div>
       )}
+      {/* crash-zoom into the fibre: streaks ramp up, white punch as we break into the atom */}
+      <SpeedLines frame={frame} amount={ci(local, [A3.dive, A3.dive + 40, A3.dive + 64, A3.dive + 90], [0, 0.6, 1, 0])} />
+      <ScreenFlash amount={pulseAt(local, [A3.dive + 64], 8, 0.65)} color="255, 255, 255" />
       <KineticWord localMs={localMs} appearMs={16800} emphasizeStartMs={17100} emphasizeEndMs={19300} removeMs={19700} text="ইলেকট্রন মেঘ" x={960} y={930} accentColor="#38BDF8" mode="SCALE_GLOW" />
     </div>
   );
@@ -541,7 +579,7 @@ const SwitchBulbKit: React.FC<{ frame: number; local: number }> = ({ frame, loca
   const drift = t < 40 ? (V * t * t) / 80 : V * 20 + V * (t - 40);
   const nIn = crossings(drift, S_IN);
   const nOut = crossings(drift, S_OUT);
-  const glow = ci(local, [C.press + 10, C.press + 30], [0, 1], EASE_OUT);
+  const glow = ci(local, [C.press + 10, C.press + 30], [0, 1], EASE_OUT) * ignitionFlicker(local, C.press + 10, 18, 2);
   const energyT = ci(local, [C.energy, C.energy + 40], [0, 1], EASE_OUT);
   const emphIn = ci(local, [C.inCount, C.inCount + 16, 1028, 1050], [0, 1, 1, 0]);
   const emphOut = ci(local, [C.outCount, C.outCount + 16, 1160, 1180], [0, 1, 1, 0]);
@@ -680,6 +718,15 @@ const SwitchBulbKit: React.FC<{ frame: number; local: number }> = ({ frame, loca
               </g>
             )}
 
+            {/* open switch: electrons jostle, a faint fizz across the gap */}
+            <StaticArcs frame={frame} x={SW.x - 6} y={SW.y + 4} radius={26} amount={ci(local, [258, 300, 600, 650], [0, 0.35, 0.35, 0])} color="#7DD3FC" count={2} seed={21} />
+            <SparkBurst local={local} at={C.press + 10} x={SW.x + 30} y={SW.y + 10} count={14} speed={7} gravity={0.25} life={24} color="#FDE68A" core="#FFFBEB" seed={33} />
+            {/* energy beat: warm heat bloom around the bulb */}
+            <ShockRing local={local} at={C.energy} x={BULB_K.x} y={BULB_K.y - 10} r={200} color="#FB923C" life={40} />
+            {energyT > 0 && (
+              <circle cx={BULB_K.x} cy={BULB_K.y - 10} r={230 + Math.sin(frame * 0.12) * 14} fill="rgba(251, 146, 60, 0.16)" opacity={energyT * (0.7 + 0.3 * Math.sin(frame * 0.23))} filter="blur(12px)" />
+            )}
+
             <PopWord local={local} at={C.press + 2} until={C.press + 70} text="খট্!" x={SW.x + 120} y={SW.y - 110} color="#FDE68A" size={56} tilt={8} />
           </svg>
         </DepthLayer>
@@ -716,6 +763,8 @@ const ROOMS = [
 
 const HouseWakesUp: React.FC<{ frame: number; local: number; duration: number }> = ({ frame, local, duration }) => {
   const lit = (at: number) => ci(local, [at, at + 22], [0, 1], EASE_OUT);
+  // room lights catch tube-light style (stutter, then steady) as each appliance switches on
+  const litF = (at: number) => lit(at) * ignitionFlicker(local, at, 22, at);
   const fanOn = lit(1497);
   const ironOn = lit(1602);
   const bellOn = lit(1688);
@@ -784,7 +833,7 @@ const HouseWakesUp: React.FC<{ frame: number; local: number; duration: number }>
               ))}
             </defs>
             {ROOMS.map((r, i) => {
-              const on = lit(r.at);
+              const on = litF(r.at);
               return (
                 <g key={r.label} clipPath={`url(#roomClip${i})`}>
                   <rect x={r.x} y={r.y} width={r.w} height={r.h} fill="#2A2017" />
@@ -834,7 +883,7 @@ const HouseWakesUp: React.FC<{ frame: number; local: number; duration: number }>
 
             {/* Room shading: dark until each appliance is named */}
             {ROOMS.map((r) => (
-              <rect key={`dark${r.label}`} x={r.x} y={r.y} width={r.w} height={r.h} fill="#05070D" opacity={0.72 * (1 - lit(r.at))} />
+              <rect key={`dark${r.label}`} x={r.x} y={r.y} width={r.w} height={r.h} fill="#05070D" opacity={0.72 * (1 - litF(r.at))} />
             ))}
 
             {/* floor slabs, walls, roof */}
@@ -857,6 +906,10 @@ const HouseWakesUp: React.FC<{ frame: number; local: number; duration: number }>
               <rect x="1180" y="190" width="150" height="96" rx="14" fill="#1E293B" stroke="#475569" strokeWidth="3" />
               <rect x="1186" y={286 - 90 * tankLevel} width="138" height={90 * tankLevel} rx="10" fill="#0EA5E9" opacity="0.55" />
               <path d="M 1560,850 L 1600,850 L 1600,240 L 1330,240" fill="none" stroke="#64748B" strokeWidth="10" />
+              {/* water splashing into the tank */}
+              {Array.from({ length: Math.max(0, Math.ceil((duration - 1790) / 16)) }).map((_, k) => (
+                <SparkBurst key={k} local={local} at={1790 + k * 16} x={1318 - (k % 3) * 10} y={286 - 90 * tankLevel} count={7} speed={5} gravity={0.45} spread={90} life={22} color="#7DD3FC" core="#E0F2FE" seed={k + 120} />
+              ))}
               {pumpOn > 0.1 &&
                 Array.from({ length: 8 }).map((_, k) => {
                   const u = ((frame * 0.012 + k / 8) % 1) * 1;

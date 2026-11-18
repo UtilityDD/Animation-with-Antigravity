@@ -8,10 +8,13 @@ import {
   BedroomFarWall,
   BedroomForeground,
   BedroomMidground,
+  BED,
   BulbLightWash,
   PopWord,
   WallCircuit,
 } from './Ep01BedroomSet';
+import { ScreenFlash, ShockRing, SparkBurst, ignitionFlicker, pulseAt } from './Ep01Fx';
+import { EASE_POP } from './Ep01SharedGraphics';
 
 /**
  * Act 1 cue sheet (local frames @60fps), measured from pauses in act1_hook.mp3 (ffmpeg silencedetect):
@@ -58,12 +61,17 @@ export const Ep01WinterHookScene: React.FC<{ frame: number; local: number; durat
 
   const switchClosed = local >= C.switchPress;
   const conduitFront = ci(local, [C.switchPress, C.switchPress + 36], [0, 1], EASE_OUT);
-  const bulbGlow = ci(local, [C.switchPress + 36, C.switchPress + 70], [0, 1], EASE_OUT);
+  // filament catches with a couple of stutters before it settles (matches the ignite SFX)
+  const bulbGlow = ci(local, [C.switchPress + 36, C.switchPress + 70], [0, 1], EASE_OUT) * ignitionFlicker(local, C.switchPress + 36, 18, 4);
   const isSurprised = local >= C.snap + 6;
   const eyeX = local >= 740 ? ci(local, [740, 830, 970], [-0.4, 0.75, -0.2]) : 0.35;
   const eyeY = local >= 740 ? ci(local, [740, 830, 970], [0.2, -0.75, 0.1]) : 0.45;
   const thoughtAlpha = ci(local, [771, 805, 1170, 1210], [0, 1, 1, 0], EASE_OUT);
   const lightFlood = bulbGlow * ci(local, [C.switchPress + 36, 760, 1000], [0, 1, 0.75]);
+  // blue static flash that lights the dark room on each crackle
+  const staticFlash = pulseAt(local, [C.sparkBursts[0]], 7, 0.55) + pulseAt(local, C.sparkBursts.slice(1), 5, 0.22);
+  const sparkY = BED.y - 6 - blanketLift * 0.2;
+  const thoughtPop = ci(local, [771, 783, 795], [0.4, 1.12, 1], EASE_POP);
 
   return (
     <div
@@ -152,12 +160,20 @@ export const Ep01WinterHookScene: React.FC<{ frame: number; local: number; durat
             />
 
             {/* comic sound word on the spark — the only text in the first 12 seconds */}
+            {/* static sparks leaping off the blanket fibres */}
+            {C.sparkBursts.map((b, i) => (
+              <SparkBurst key={b} local={local} at={b} x={BED.x + 40 + (i % 3) * 30 - 30} y={sparkY - (i % 2) * 18} count={i === 0 ? 22 : 9} speed={i === 0 ? 11 : 7} life={i === 0 ? 36 : 24} gravity={0.12} color="#38BDF8" seed={i + 2} size={i === 0 ? 1.4 : 1} />
+            ))}
+            <ShockRing local={local} at={C.snap} x={BED.x + 40} y={sparkY} r={130} color="#7DD3FC" life={26} width={3} />
+            {/* contact spark inside the 6A switch as it closes */}
+            <SparkBurst local={local} at={C.switchPress} x={1242} y={534} count={10} speed={6} life={20} gravity={0.2} color="#FDE68A" core="#FFFBEB" seed={8} />
+
             <PopWord local={local} at={C.snap} until={C.whip - 4} text="চটপট!" x={790} y={455} color="#7DD3FC" size={78} tilt={-10} />
             <PopWord local={local} at={C.switchPress + 2} until={C.switchPress + 70} text="খট্!" x={1140} y={410} color="#FDE68A" size={58} tilt={8} />
 
             {/* Thought bubble: spark =? bulb */}
             {thoughtAlpha > 0.01 && (
-              <g opacity={thoughtAlpha}>
+              <g opacity={thoughtAlpha} transform={`translate(760, 300) scale(${thoughtPop.toFixed(3)}) translate(-760, -300)`}>
                 <circle cx="665" cy="365" r="7" fill="#F8F1E3" />
                 <circle cx="695" cy="335" r="11" fill="#F8F1E3" />
                 <g transform="translate(795, 255)">
@@ -181,6 +197,7 @@ export const Ep01WinterHookScene: React.FC<{ frame: number; local: number; durat
       </MultiplaneCameraRig>
 
       <BulbLightWash amount={lightFlood} />
+      <ScreenFlash amount={staticFlash} color="125, 211, 252" at={[42, 56]} />
 
       {/* The one question the whole episode answers */}
       <VidyuterKineticTitle frame={local} startFrame={1100} endFrame={1215} lines={[{ text: 'আসলে বিদ্যুৎ কী?', highlight: 'কী?', sizePx: 72 }]} align="center" x={960} y={880} accentColor="#FBBF24" variant="spring" />

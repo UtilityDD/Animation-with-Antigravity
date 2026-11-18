@@ -9,11 +9,14 @@ import {
   BedroomFarWall,
   BedroomForeground,
   BedroomMidground,
+  BED,
   BulbLightWash,
+  CONDUIT_D,
   PHONE,
   WallCircuit,
   WorldTag,
 } from './Ep01BedroomSet';
+import { DustPuff, ScreenFlash, ShockRing, SparkBurst, pulseAt } from './Ep01Fx';
 
 /**
  * ACT 4 cue sheet (act4_confusion.mp3, local frames @60fps, from VO pauses):
@@ -80,6 +83,11 @@ export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; d
   const combX = ci(local, [A4.p3 + 50, A4.p3 + 62], [0, 1]);
   const pushA = ci(local, [A4.push, A4.push + 14], [0, 1]);
   const jab = local >= A4.push ? Math.max(0, Math.sin((local - A4.push) * 0.18)) * 22 : 0;
+  // each forward peak of the jab: sin((t)*0.18) = 1  →  t = 8.7 + k·34.9
+  const JABS = [0, 1, 2, 3, 4].map((k) => Math.round(A4.push + 8.7 + k * 34.9));
+  const CHIPS = [A4.answer + 10, A4.answer + 22, A4.answer + 34];
+  const deathT = ci(local, [A4.p2 + 150, A4.p2 + 168], [0, 1]);
+  const lowPulse = batteryPct < 20 && !phoneDead ? 0.5 + 0.5 * Math.sin(frame * 0.35) : 0;
 
   // boy's gaze follows each mystery
   const lookX = ci(local, [A4.khotka, A4.khotka + 30, A4.bill - 20, A4.bill + 20, A4.p2, A4.p2 + 30, A4.p3, A4.p3 + 30, A4.calm, A4.calm + 30], [0.3, -0.3, -0.3, 0.6, 0.6, -1, -1, 1, 1, 0]);
@@ -134,6 +142,15 @@ export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; d
                 <BedWithBlanket blanketLift={60} crackle={crackle} arcSeed={Math.floor(local / 2)} charges={charges} frame={frame} />
                 <WallCircuit frame={frame} closed front={0} flow={local < A4.recap[2] ? 0.6 : flowFlare} bulbGlow={1} xray={local >= A4.p3 ? ci(local, [A4.p3, A4.p3 + 30], [0, 1]) : 0} />
 
+                {/* recap: charges glint, the blanket crackles, the wall wire flares */}
+                {[0, 16].map((d, i) => (
+                  <SparkBurst key={d} local={local} at={A4.recap[0] + d} x={660 + i * 110} y={565} count={8} speed={4} gravity={0} life={26} color={i ? '#7DD3FC' : '#FDA4AF'} core="#FFFFFF" seed={i + 140} />
+                ))}
+                {[A4.recap[1], A4.recap[1] + 16, A4.recap[1] + 38].map((b, i) => (
+                  <SparkBurst key={b} local={local} at={b} x={BED.x + 20 + i * 30} y={BED.y - 20} count={i ? 8 : 14} speed={i ? 6 : 9} gravity={0.12} life={26} color="#38BDF8" seed={i + 150} />
+                ))}
+                <path d={CONDUIT_D} fill="none" stroke="#FDE68A" strokeWidth="20" strokeLinejoin="round" opacity={pulseAt(local, [A4.recap[2]], 26, 0.45)} filter="blur(6px)" />
+
                 {/* recap tags, pinned to the objects */}
                 <WorldTag local={local} at={A4.recap[0]} until={380} text="বৈদ্যুতিক চার্জ" x={700} y={560} color="#F43F5E" dx={-60} dy={-170} size={28} />
                 <WorldTag local={local} at={A4.recap[1]} until={380} text="স্থির তড়িৎ" x={830} y={600} color="#38BDF8" dx={170} dy={-60} size={28} />
@@ -173,13 +190,28 @@ export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; d
                   </g>
                 )}
 
+                <DustPuff local={local} at={A4.bill + 22} x={BILL_REST.x} y={BILL_REST.y + 100} width={190} color="#E2E8F0" life={36} />
+
                 {/* Paradox 2 — the phone lifts off the nightstand and dies */}
                 {phoneT > 0 && (
                   <g
                     transform={`translate(${(PHONE.x + (PHONE_HERO.x - PHONE.x) * phoneT).toFixed(1)}, ${(PHONE.y + (PHONE_HERO.y - PHONE.y) * phoneT).toFixed(1)}) rotate(${(90 * (1 - phoneT) - 6 * phoneT).toFixed(1)}) scale(${(0.4 + 0.6 * phoneT).toFixed(3)})`}
                   >
-                    <rect x="-62" y="-118" width="124" height="236" rx="18" fill="#0F172A" stroke="#38BDF8" strokeWidth="3" />
+                    {lowPulse > 0 && <rect x="-80" y="-136" width="160" height="272" rx="28" fill="none" stroke="#F43F5E" strokeWidth="10" opacity={lowPulse * 0.6} filter="blur(4px)" />}
+                    <rect x="-62" y="-118" width="124" height="236" rx="18" fill="#0F172A" stroke={lowPulse > 0 ? '#F43F5E' : '#38BDF8'} strokeWidth="3" />
                     <rect x="-54" y="-104" width="108" height="208" rx="10" fill={phoneDead ? '#020617' : '#0B1324'} />
+                    {/* screen dies like an old CRT: collapses to a line, then a dot */}
+                    {deathT > 0 && deathT < 1 && (
+                      <rect
+                        x={-54 * (deathT < 0.5 ? 1 : 2 * (1 - deathT))}
+                        y={-Math.max(2, 104 * (1 - deathT * 2.2))}
+                        width={108 * (deathT < 0.5 ? 1 : 2 * (1 - deathT))}
+                        height={Math.max(4, 208 * (1 - deathT * 2.2))}
+                        fill="#F8FAFC"
+                        opacity={0.9}
+                        filter="drop-shadow(0 0 8px #E0F2FE)"
+                      />
+                    )}
                     {!phoneDead && (
                       <g>
                         <rect x="-14" y="-52" width="28" height="8" rx="3" fill="#64748B" />
@@ -200,6 +232,9 @@ export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; d
                         <rect key={k} x={-56 + k * 15} y="0" width="7" height="24" rx="2" fill="#0284C7" />
                       ))}
                       <line x1="-74" y1="-28" x2="74" y2="34" stroke="#F43F5E" strokeWidth="7" strokeLinecap="round" strokeDasharray="170" strokeDashoffset={170 * (1 - combX)} />
+                      {[0, 4, 8, 12].map((d, i) => (
+                        <SparkBurst key={d} local={local} at={A4.p3 + 50 + d} x={-74 + 148 * (i / 3)} y={-28 + 62 * (i / 3)} count={6} speed={4} gravity={0.2} life={18} color="#F43F5E" core="#FFE4E6" seed={i + 160} />
+                      ))}
                     </g>
                     <g transform={`translate(${(WIRE_SPOT.x - 100 + jab).toFixed(1)}, ${WIRE_SPOT.y})`} opacity={pushA}>
                       <path d="M -50,-16 L 4,-16 L 4,-30 L 40,0 L 4,30 L 4,16 L -50,16 Z" fill="#FBBF24" stroke="#0F172A" strokeWidth="3" />
@@ -207,6 +242,14 @@ export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; d
                     </g>
                   </g>
                 )}
+
+                {JABS.map((j, k) => (
+                  <ShockRing key={j} local={local} at={j} x={WIRE_SPOT.x - 36} y={WIRE_SPOT.y} r={70 - k * 6} color="#FBBF24" life={20} width={3} />
+                ))}
+                {/* each episode chip lands like a rubber stamp */}
+                <ShockRing local={local} at={CHIPS[0]} x={BILL_REST.x + 10} y={BILL_REST.y - 140} r={110} color="#FDA4AF" life={24} />
+                <ShockRing local={local} at={CHIPS[1]} x={PHONE_HERO.x - 10} y={PHONE_HERO.y - 160} r={110} color="#BAE6FD" life={24} />
+                <ShockRing local={local} at={CHIPS[2]} x={WIRE_SPOT.x + 120} y={WIRE_SPOT.y - 170} r={110} color="#FDE68A" life={24} />
 
                 <EpisodeChip local={local} at={A4.answer + 10} x={BILL_REST.x + 10} y={BILL_REST.y - 140} text="পর্ব 16" color="#FDA4AF" />
                 <EpisodeChip local={local} at={A4.answer + 22} x={PHONE_HERO.x - 10} y={PHONE_HERO.y - 160} text="পর্ব 10" color="#BAE6FD" />
@@ -221,12 +264,20 @@ export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; d
             </DepthLayer>
           </MultiplaneCameraRig>
           <BulbLightWash amount={0.75} />
+          <ScreenFlash amount={pulseAt(local, [A4.p2 + 150], 5, 0.25)} color="224, 242, 254" at={[30, 50]} />
         </div>
       )}
 
       {/* Episode 02 end card */}
       {teaserIn > 0.01 && (
         <svg width="1920" height="1080" style={{ position: 'absolute', inset: 0 }} opacity={teaserIn}>
+          <defs>
+            <radialGradient id="teaserBloom">
+              <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.45" />
+              <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <circle cx="960" cy="440" r={360 + 50 * Math.sin(frame * 0.06)} fill="url(#teaserBloom)" opacity={ci(local, [A4.teaser, A4.teaser + 40], [0, 1]) * (0.75 + pulseAt(local, [1964], 14, 0.6))} />
           <g transform={`translate(960, 440) scale(${(0.7 + 0.3 * teaserIn + (local - A4.teaser) * 0.0006).toFixed(4)}) translate(-960, -440)`}>
             <NeutralAtomCloud frame={frame} cx={960} cy={440} radius={210} cloudStrength={1} nucleusGlow={0.6} dots={130} />
           </g>
@@ -236,9 +287,12 @@ export const Ep01ConfusionOutroScene: React.FC<{ frame: number; local: number; d
           <text x="960" y="810" textAnchor="middle" fill="#FDE68A" fontSize="56" fontWeight="800" opacity={ci(local, [1964, 1990], [0, 1])}>
             পরমাণু ও বৈদ্যুতিক চার্জ
           </text>
+          <ShockRing local={local} at={1964} x={960} y={440} r={300} color="#FDE68A" life={44} />
+          <SparkBurst local={local} at={1964} x={960} y={440} count={26} speed={14} gravity={0.04} life={44} color="#FDE68A" core="#FFFBEB" seed={170} />
         </svg>
       )}
 
+      <ScreenFlash amount={pulseAt(local, [1964], 10, 0.35)} color="253, 230, 138" at={[50, 45]} />
       <KineticWord localMs={localMs} appearMs={27000} emphasizeStartMs={27300} emphasizeEndMs={30200} removeMs={30700} text="পরের পর্বগুলোতে উত্তর!" x={960} y={960} accentColor="#38BDF8" mode="SCALE_GLOW" />
     </div>
   );

@@ -30,8 +30,12 @@ export interface ThalesPose {
   // Arms & Action
   rubProgress: number; // 0..1 rubbing oscillation
   leftArmState: 'holdingWool' | 'resting' | 'raisedWonder';
-  rightArmState: 'rubbingAmber' | 'holdingAmberUp' | 'astonished';
+  rightArmState: 'rubbingAmber' | 'holdingAmberUp' | 'astonished' | 'reachingAmber';
   amberGlow: number; // 0..1 electrostatic glow
+  /** 'reachingAmber' only: 0 = rubbing at the chest, 1 = arm stretched out holding the amber. */
+  reach?: number;
+  /** 'reachingAmber' only: extra forearm wobble in degrees (nervous / awed tremble). */
+  handTremble?: number;
   beardSwayDeg?: number;
   amazeBlend?: number; // 0..1 for smooth gesture interpolation
 }
@@ -131,6 +135,48 @@ const ExpressiveHand: React.FC<{ flipX?: boolean; open?: number }> = ({ flipX = 
     />
   </g>
 );
+
+
+// ------------------------------------------------------------------
+// 'reachingAmber' arm geometry — shared by the renderer and by scenes that need to
+// place glow / feathers / sparks exactly on the amber held in Thales' hand.
+// ------------------------------------------------------------------
+const SHOULDER_R = { x: 105, y: 42 };
+const ELBOW_IN_UPPER = { x: -8, y: 140 };
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const rotPt = (x: number, y: number, deg: number) => {
+  const r = (deg * Math.PI) / 180;
+  return { x: x * Math.cos(r) - y * Math.sin(r), y: x * Math.sin(r) + y * Math.cos(r) };
+};
+
+export function thalesReachArm(pose: Pick<ThalesPose, 'rubProgress' | 'reach' | 'handTremble'>) {
+  const reach = Math.min(1, Math.max(0, pose.reach ?? 0));
+  const rubAngle = Math.sin(pose.rubProgress * Math.PI * 2) * 16 * (1 - reach);
+  const rubX = Math.cos(pose.rubProgress * Math.PI * 2) * 22 * (1 - reach);
+  const upperDeg = lerp(22, -62, reach) + rubAngle;
+  const foreDeg = lerp(-50, -20, reach) + rubAngle * 0.8 + (pose.handTremble ?? 0);
+  const foreLen = lerp(92, 116, reach);
+  const amberInFore = { x: rubX + lerp(14, 2, reach), y: foreLen + lerp(16, 30, reach) };
+  return { reach, upperDeg, foreDeg, foreLen, rubX, amberInFore };
+}
+
+/** Amber centre in rig SVG coordinates (before the chest-lean rotation). */
+function amberRigPoint(pose: Pick<ThalesPose, 'rubProgress' | 'reach' | 'handTremble' | 'chestLeanDeg'>) {
+  const a = thalesReachArm(pose);
+  const inFore = rotPt(a.amberInFore.x, a.amberInFore.y, a.foreDeg);
+  const inUpper = rotPt(ELBOW_IN_UPPER.x + inFore.x, ELBOW_IN_UPPER.y + inFore.y, a.upperDeg);
+  const p = { x: SHOULDER_R.x + inUpper.x, y: SHOULDER_R.y + inUpper.y };
+  // body group rotates about (0, 260)
+  const q = rotPt(p.x, p.y - 260, pose.chestLeanDeg);
+  return { x: q.x, y: q.y + 260 };
+}
+
+/** Screen position (scene px) of the amber held by a ThalesRig drawn with `pose` and `scale`. */
+export function thalesAmberScreen(pose: ThalesPose, scale = 1) {
+  const p = amberRigPoint(pose);
+  // the rig div is 640x880, viewBox origin at (-320,-400), scaled about its bottom centre
+  return { x: pose.worldX + 320 + p.x * scale, y: pose.worldY + pose.breathY + 880 + (p.y + 400 - 880) * scale };
+}
 
 export const ThalesRig: React.FC<ThalesRigProps> = ({
   pose,
@@ -372,6 +418,54 @@ export const ThalesRig: React.FC<ThalesRigProps> = ({
               </g>
             </g>
           )}
+
+          {rightArmState === 'reachingAmber' && (() => {
+            const a = thalesReachArm(pose);
+            return (
+              <g transform={`translate(${SHOULDER_R.x}, ${SHOULDER_R.y}) rotate(${a.upperDeg.toFixed(2)})`}>
+                <path
+                  d="M -18,-10 C 4,38 2,96 -16,142 L 24,146 C 36,98 32,38 18,-10 Z"
+                  fill="url(#himationBase)"
+                  stroke="#94A3B8"
+                  strokeWidth="2"
+                />
+                {/* shoulder cap so the stretched sleeve stays attached to the body */}
+                <ellipse cx="2" cy="4" rx="30" ry="26" fill="#E2E8F0" />
+                <g transform={`translate(${ELBOW_IN_UPPER.x}, ${ELBOW_IN_UPPER.y}) rotate(${a.foreDeg.toFixed(2)})`}>
+                  <rect x="-15" y="0" width="30" height={a.foreLen} rx="14" fill="url(#thalesSkin)" />
+                  <g transform={`translate(${a.amberInFore.x.toFixed(2)}, ${a.amberInFore.y.toFixed(2)})`}>
+                    {/* amber gripped by the fingertips, fingers curl over it from above */}
+                    <g transform={`scale(${(1 + a.reach * 0.25).toFixed(3)})`}>
+                      <path
+                        d="M -22,-14 C -12,-26 16,-24 28,-10 C 38,4 32,26 18,34 C 4,40 -18,36 -26,20 C -32,6 -30,-4 -22,-14 Z"
+                        transform="translate(-2, -10)"
+                        fill="url(#amberGem)"
+                        stroke="#FFDF73"
+                        strokeWidth="2"
+                      />
+                      <ellipse cx="-10" cy="-16" rx="5" ry="2.4" fill="#FFFFFF" opacity="0.85" />
+                    </g>
+                    <ellipse cx="0" cy={-22 - a.reach * 6} rx="17" ry="14" fill="url(#thalesSkin)" />
+                    {[-12, -3, 6, 14].map((fx, i) => (
+                      <path
+                        key={fx}
+                        d={`M ${fx},${-26 - a.reach * 6} q ${4 + i},10 ${2 - i},${16 + (i === 1 || i === 2 ? 4 : 0)}`}
+                        fill="none"
+                        stroke="#E4B596"
+                        strokeWidth="7"
+                        strokeLinecap="round"
+                      />
+                    ))}
+                    {amberGlow > 0.2 && (
+                      <g opacity={Math.min(1, amberGlow)}>
+                        <circle cx="0" cy="0" r={20 + amberGlow * 14} fill="rgba(255, 223, 115, 0.22)" />
+                      </g>
+                    )}
+                  </g>
+                </g>
+              </g>
+            );
+          })()}
 
           {rightArmState === 'astonished' && (
             /* Natural human startled recoil: upper arm hugs close to side, forearm bent up toward chest! */
